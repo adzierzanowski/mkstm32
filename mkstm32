@@ -2,10 +2,10 @@
 
 # This script simply calls the neccesary programs
 # regarding specific task during the development
-# of an STM32 projects that make use of Makefiles
+# of STM32 projects that make use of Makefiles
 # generated with STM32CubeMX.
 #
-# It (hopefully) saves keystrokes and mental pain.
+# It (hopefully) saves keystrokes and some mental pain.
 
 # Following programs are required to be included in $PATH:
 #
