@@ -7,13 +7,12 @@ It (hopefully) saves keystrokes and some mental pain.
 
 Following programs are required to be included in `$PATH`:
 
+* python3
 * make
-* [arm-none-eabi-\*](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads)
+* [arm-none-eabi-\*](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads) binaries
+* [texane/stlink](https://github.com/texane/stlink) binaries (`st-flash`,
+`st-util`, `st-info`)
 
-* [texane/stlink](https://github.com/texane/stlink)
-* * st-util
-* * st-flash
-* * st-info
-
-Should work on macOS or linux. Windows requires certain
-modifications but all the necessary software is available.
+Should work on macOS and linux. Windows requires certain
+modifications but all the necessary software is available
+for that OS.
