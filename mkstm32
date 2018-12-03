@@ -1,0 +1,198 @@
+#!/usr/bin/env python3
+
+# This script simply calls the neccesary programs
+# regarding specific task during the development
+# of an STM32 projects that make use of Makefiles
+# generated with STM32CubeMX.
+#
+# It (hopefully) saves keystrokes and mental pain.
+
+# Following programs are required to be included in $PATH:
+#
+#   make
+#   arm-none-eabi-*
+#   st-util
+#   st-flash
+#   st-info
+
+# Should work on macOS or linux. Windows requires certain
+# modifications but all the necessary software is available.
+
+import os
+import sys
+import time
+import argparse
+import subprocess
+
+start = time.time()
+
+prog_name = '\033[1m{}\033[0m'.format(os.path.split(sys.argv[0])[1])
+
+parser = argparse.ArgumentParser(description='Build, upload and debug '
+                                 'an STM32Cube Makefile project')
+
+common = parser.add_argument_group(title='Most useful switches')
+rare = parser.add_argument_group(title='Some not so useful switches')
+
+common.add_argument('-c', '--compile',
+                    action='store_true')
+common.add_argument('-d', '--debug',
+                    help='Start a debugging session',
+                    action='store_true')
+common.add_argument('-i', '--info',
+                    help='Display ST-Link information',
+                    action='store_true')
+common.add_argument('-r', '--reset',
+                    help='Reset the mcu',
+                    action='store_true')
+common.add_argument('-u', '--upload',
+                    action='store_true')
+common.add_argument('-v', '--verbose',
+                    action='store_false',
+                    help='Silent mode (didn\'t bother to refactor names)')
+common.add_argument('-x', '--c-plus-plus',
+                    action='store_true',
+                    help='Build with g++')
+
+rare.add_argument('-b', '--binary',
+                    type=str)
+rare.add_argument('-g', '--gcc-path',
+                    type=str)
+rare.add_argument('-m', '--makefile',
+                    type=str,
+                    default='Makefile',
+                    help='Makefile generated with STM32Cube')
+rare.add_argument('-p', '--project-directory',
+                    type=str,
+                    default=os.getcwd())
+rare.add_argument('--flash-address',
+                    type=str,
+                    default='0x8000000')
+
+args = parser.parse_args()
+
+def print_message(message, error=False, success=False, verbose=False):
+  if success:
+    message = '\033[1m\033[32m{}\033[0m'.format(message)
+
+  if error:
+    sys.stderr.write(prog_name)
+    sys.stderr.write(': \033[1m\033[31m{}\033[0m\n'.format(message))
+    sys.exit(1)
+
+  elif ((verbose and args.verbose) or not verbose):
+    print('{}: {}'.format(prog_name, message))
+
+if args.reset:
+  if subprocess.call(['st-flash', 'reset']):
+    print_message('Failed to reset the MCU.', error=True)
+  sys.exit()
+
+if args.info:
+  if subprocess.call(['st-info', '--probe']):
+    print_message('Failed to probe the MCU.', error=True)
+  sys.exit()
+
+if not any([args.compile, args.upload, args.debug]):
+  parser.print_help()
+  sys.exit(1)
+
+cpp_makefile = 'Makefile_cpp.mk'
+
+def generate_cpp_makefile():
+  print_message('Generating C++ Makefile.', verbose=True)
+
+  with open(args.makefile, 'r') as f:
+    data = f.read()
+
+  data = data.replace('gcc', 'g++')
+
+  splitdata = data.splitlines()
+  for i, line in enumerate(splitdata):
+    if 'LDFLAGS =' in line:
+      splitdata.insert(i + 1, 'LDFLAGS += -specs=nosys.specs')
+
+  with open('Makefile_cpp.mk', 'w') as f:
+    f.write('\n'.join(splitdata))
+
+gcc_path = None
+
+if args.gcc_path:
+  gcc_path = args.gcc_path
+elif 'GCC_PATH' in os.environ.keys():
+  gcc_path = os.getenv('GCC_PATH')
+
+if gcc_path:
+  os.putenv('GCC_PATH', gcc_path)
+
+if args.binary:
+  bin_file = args.binary
+  elf_file = bin_file
+else:
+  filename_base = os.path.split(args.project_directory)[-1]
+  bin_file = os.path.join(args.project_directory, 'build',
+                             filename_base + '.bin')
+  elf_file = os.path.join(args.project_directory, 'build',
+                          filename_base + '.elf')
+
+if args.debug:
+  print_message('Starting GDB server.', verbose=True)
+  gdb_server = subprocess.Popen(['st-util'],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
+
+  time.sleep(0.1)
+
+  if gdb_server.poll():
+    print_message('Failed to start a GDB server.', error=True)
+  else:
+    print_message('Successfully started GDB server.', verbose=True)
+
+  try:
+    subprocess.call(['arm-none-eabi-gdb', elf_file])
+  except KeyboardInterrupt:
+    pass
+
+  print_message('Closing the GDB server.', verbose=True)
+  gdb_server.kill()
+  print_message('Done.', verbose=True)
+  sys.exit()
+
+if args.compile:
+  if args.c_plus_plus:
+    print_message('Compiling for C++.', verbose=True)
+    generate_cpp_makefile()
+  else:
+    print_message('Compiling for C.', verbose=True)
+
+  print_message('Cleaning build directory.', verbose=True)
+  if subprocess.call(['make', '-f', args.makefile, 'clean']):
+    print_message('Failed to clean build directory.', error=True)
+
+  print_message('Calling make.', verbose=True)
+  if args.c_plus_plus:
+    make_status = subprocess.call(['make', '-f', cpp_makefile])
+  else:
+    make_status = subprocess.call(['make', '-f', args.makefile])
+
+  if make_status:
+    print_message('Failed to successfully execute make.', error=True)
+  else:
+    print_message('Successfully compiled firmware.',
+                  verbose=True, success=True)
+
+if args.upload:
+  print_message('Uploading \033[1m{}\033[0m '
+    'to the microcontroller.'.format(os.path.split(bin_file)[-1]),
+                verbose=True)
+
+
+  if subprocess.call(['st-flash', 'write', bin_file, '0x8000000']):
+    print_message('Failed to flash the MCU.', error=True)
+  else:
+    print_message('Successfully uploaded firmware.',
+                  verbose=True, success=True)
+
+print_message('Done in \033[1m{0:0.2f}\033[0m seconds.'.format(time.time() - start),
+              verbose=True)
+
