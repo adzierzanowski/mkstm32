@@ -16,3 +16,25 @@ Following programs are required to be included in `$PATH`:
 Should work on macOS and linux. Windows requires certain
 modifications but all the necessary software is available
 for that OS.
+
+# examples
+
+Compiling:
+
+    $ mkstm32 -c
+
+Generating C++ Makefile from default one, compiling and uploading:
+
+    $ mkstm32 -cux
+
+Starting a debug session using `st-util` and GDB:
+
+    $ mkstm32 -d
+
+Resetting the MCU:
+
+    $ mkstm32 -r
+    
+Getting information about the ST-Link connection:
+
+    $ mkstm32 -i   
