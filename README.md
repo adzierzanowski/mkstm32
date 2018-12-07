@@ -20,6 +20,9 @@ You should be able to run this script under Windows after:
 * adding the extension to the script file: `mkstm32.py`
 * making sure you have added all the neccessary programs to `PATH`
 enviroment variable
+* making sure all of those programs are named properly (e.g. if you're
+using mingw32, you might want to consider making a copy `mingw32-make.exe`
+and name it `make.exe`)
 
 # examples
 
