@@ -8,7 +8,7 @@ import subprocess
 
 start = time.time()
 
-prog_name = '\033[1m{}\033[0m'.format(os.path.split(sys.argv[0])[1])
+prog_name = os.path.split(sys.argv[0])[1]
 
 parser = argparse.ArgumentParser(description='Build, upload and debug '
                                  'an STM32Cube Makefile project')
@@ -53,17 +53,35 @@ rare.add_argument('--flash-address',
 
 args = parser.parse_args()
 
+def bold(text):
+  if os.name == 'posix':
+    return '\033[1m{}\033[0m'.format(text)
+  else:
+    return text
+
+def green(text):
+  if os.name == 'posix':
+    return '\033[32m{}\033[0m'.format(text)
+  else:
+    return text
+
+def red(text):
+  if os.name == 'posix':
+    return '\033[31m{}\033[0m'.format(text)
+  else:
+    return text
+
 def print_message(message, error=False, success=False, verbose=False):
   if success:
-    message = '\033[1m\033[32m{}\033[0m'.format(message)
+    message = '{}'.format(bold(green(message)))
 
   if error:
-    sys.stderr.write(prog_name)
-    sys.stderr.write(': \033[1m\033[31m{}\033[0m\n'.format(message))
+    sys.stderr.write(bold(prog_name))
+    sys.stderr.write(': {}\n'.format(bold(red(message))))
     sys.exit(1)
 
   elif ((verbose and args.verbose) or not verbose):
-    print('{}: {}'.format(prog_name, message))
+    print('{}: {}'.format(bold(prog_name), message))
 
 if args.reset:
   if subprocess.call(['st-flash', 'reset']):
