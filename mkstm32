@@ -182,8 +182,8 @@ if args.compile:
                   verbose=True, success=True)
 
 if args.upload:
-  print_message('Uploading \033[1m{}\033[0m '
-    'to the microcontroller.'.format(os.path.split(bin_file)[-1]),
+  print_message('Uploading {} '
+    'to the microcontroller.'.format(bold(os.path.split(bin_file)[-1])),
                 verbose=True)
 
 

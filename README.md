@@ -13,9 +13,13 @@ Following programs are required to be included in `$PATH`:
 * [texane/stlink](https://github.com/texane/stlink) binaries (`st-flash`,
 `st-util`, `st-info`)
 
-Should work on macOS and linux. Windows requires certain
-modifications but all the necessary software is available
-for that OS.
+Should work on macOS and linux.
+
+You should be able to run this script under Windows after:
+
+* adding the extension to the script file: `mkstm32.py`
+* making sure you have added all the neccessary programs to `PATH`
+enviroment variable
 
 # examples
 
