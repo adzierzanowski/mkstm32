@@ -21,8 +21,8 @@ You should be able to run this script under Windows after:
 * making sure you have added all the neccessary programs to `PATH`
 enviroment variable
 * making sure all of those programs are named properly (e.g. if you're
-using mingw32, you might want to consider making a copy of
-`mingw32-make.exe` and naming it `make.exe`)
+using mingw32, you should use `make.exe` from `MinGW\msys\1.0\bin` rather
+than `mingw32-make.exe` from `MinGW\bin`).
 
 # examples
 
