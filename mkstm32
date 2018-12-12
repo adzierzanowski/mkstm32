@@ -27,6 +27,9 @@ common.add_argument('-i', '--info',
 common.add_argument('-r', '--reset',
                     help='Reset the mcu',
                     action='store_true')
+common.add_argument('-s', '--size',
+                    help='See the size of the binaries',
+                    action='store_true')
 common.add_argument('-u', '--upload',
                     action='store_true')
 common.add_argument('-v', '--verbose',
@@ -93,7 +96,7 @@ if args.info:
     print_message('Failed to probe the MCU.', error=True)
   sys.exit()
 
-if not any([args.compile, args.upload, args.debug]):
+if not any([args.compile, args.upload, args.debug, args.size]):
   parser.print_help()
   sys.exit(1)
 
@@ -134,6 +137,10 @@ else:
                              filename_base + '.bin')
   elf_file = os.path.join(args.project_directory, 'build',
                           filename_base + '.elf')
+  hex_file = os.path.join(args.project_directory, 'build',
+                          filename_base + '.hex')
+
+
 
 if args.debug:
   print_message('Starting GDB server.', verbose=True)
@@ -156,6 +163,29 @@ if args.debug:
   print_message('Closing the GDB server.', verbose=True)
   gdb_server.kill()
   print_message('Done.', verbose=True)
+  sys.exit()
+
+if args.size:
+  with open(bin_file) as f:
+    f.seek(0, 2)
+    bin_size = f.tell()
+  with open(elf_file) as f:
+    f.seek(0, 2)
+    elf_size = f.tell()
+  with open(hex_file) as f:
+    f.seek(0, 2)
+    hex_size = f.tell()
+  
+  bin_file = os.path.split(bin_file)[1]
+  elf_file = os.path.split(elf_file)[1]
+  hex_file = os.path.split(hex_file)[1]
+
+  print_message('\n\t{}: {} B\n\t{}: {} B\n\t{}: {} B'.format(bin_file,
+                                                              bin_size,
+                                                              elf_file,
+                                                              elf_size,
+                                                              hex_file,
+                                                              hex_size))
   sys.exit()
 
 if args.compile:
