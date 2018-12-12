@@ -32,9 +32,9 @@ common.add_argument('-s', '--size',
                     action='store_true')
 common.add_argument('-u', '--upload',
                     action='store_true')
-common.add_argument('-v', '--verbose',
-                    action='store_false',
-                    help='Silent mode (didn\'t bother to refactor names)')
+common.add_argument('-t', '--silent',
+                    action='store_true',
+                    help='Silent mode')
 common.add_argument('-x', '--c-plus-plus',
                     action='store_true',
                     help='Build with g++')
@@ -83,7 +83,7 @@ def print_message(message, error=False, success=False, verbose=False):
     sys.stderr.write(': {}\n'.format(bold(red(message))))
     sys.exit(1)
 
-  elif ((verbose and args.verbose) or not verbose):
+  elif ((verbose and not args.silent) or not verbose):
     print('{}: {}'.format(bold(prog_name), message))
 
 if args.reset:
@@ -223,6 +223,7 @@ if args.upload:
     print_message('Successfully uploaded firmware.',
                   verbose=True, success=True)
 
-print_message('Done in \033[1m{0:0.2f}\033[0m seconds.'.format(time.time() - start),
+time_elapsed = time.time() - start
+print_message('Done in {0:0.2f} seconds.'.format(bold(str(time_elapsed))),
               verbose=True)
 
