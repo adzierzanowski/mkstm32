@@ -74,7 +74,7 @@ def call_executable(cmd, error_message):
     if (subprocess.call(cmd)):
       print_message(error_message, error=True)
   except FileNotFoundError:
-    print_message('Failed to execute {}. Make sure you\'ve included it in your PATH variable.'.format(cmd[0]))
+    print_message('Failed to execute {}. Make sure you\'ve included it in your PATH.'.format(cmd[0]), error=True)
 
 # Main body of the program
 
@@ -83,8 +83,7 @@ if args.reset:
   sys.exit()
 
 if args.info:
-  if subprocess.call(['st-info', '--probe']):
-    print_message('Failed to probe the MCU.', error=True)
+  call_executable(['st-info', '--probe'], 'Failed to probe the MCU.')
   sys.exit()
 
 if not any([args.compile, args.upload, args.debug, args.size]):
@@ -131,8 +130,6 @@ else:
   hex_file = os.path.join(args.project_directory, 'build',
                           filename_base + '.hex')
 
-
-
 if args.debug:
   print_message('Starting GDB server.', verbose=True)
   gdb_server = subprocess.Popen(['st-util'],
@@ -156,16 +153,15 @@ if args.debug:
   print_message('Done.', verbose=True)
   sys.exit()
 
+def fsize(fname):
+  with open(fname) as f:
+    f.seek(0, 2)
+    return f_tell
+
 if args.size:
-  with open(bin_file) as f:
-    f.seek(0, 2)
-    bin_size = f.tell()
-  with open(elf_file) as f:
-    f.seek(0, 2)
-    elf_size = f.tell()
-  with open(hex_file) as f:
-    f.seek(0, 2)
-    hex_size = f.tell()
+  bin_size = fsize(bin_file)
+  elf_size = fsize(elf_file)
+  hex_size = fsize(hex_file)
   
   bin_file = os.path.split(bin_file)[1]
   elf_file = os.path.split(elf_file)[1]
@@ -187,8 +183,8 @@ if args.compile:
     print_message('Compiling for C.', verbose=True)
 
   print_message('Cleaning build directory.', verbose=True)
-  if subprocess.call(['make', '-f', args.makefile, 'clean']):
-    print_message('Failed to clean build directory.', error=True)
+  call_executable(['make', '-f', args.makefile, 'clean'],
+                  'Failed to clean build directory.')
 
   print_message('Calling make.', verbose=True)
   if args.c_plus_plus:
