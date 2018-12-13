@@ -223,7 +223,7 @@ if args.upload:
     print_message('Successfully uploaded firmware.',
                   verbose=True, success=True)
 
-time_elapsed = time.time() - start
-print_message('Done in {0:0.2f} seconds.'.format(bold(str(time_elapsed))),
+time_elapsed = '{0:0.2f}'.format(time.time() - start)
+print_message('Done in {} seconds.'.format(bold(time_elapsed)),
               verbose=True)
 
