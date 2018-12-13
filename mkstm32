@@ -6,9 +6,12 @@ import time
 import argparse
 import subprocess
 
+# Execution time is measured for some actions
 start = time.time()
 
+# This executable name
 prog_name = os.path.split(sys.argv[0])[1]
+
 
 parser = argparse.ArgumentParser(description='Build, upload and debug '
                                  'an STM32Cube Makefile project')
@@ -16,45 +19,24 @@ parser = argparse.ArgumentParser(description='Build, upload and debug '
 common = parser.add_argument_group(title='Most useful switches')
 rare = parser.add_argument_group(title='Some not so useful switches')
 
-common.add_argument('-c', '--compile',
-                    action='store_true')
-common.add_argument('-d', '--debug',
-                    help='Start a debugging session',
-                    action='store_true')
-common.add_argument('-i', '--info',
-                    help='Display ST-Link information',
-                    action='store_true')
-common.add_argument('-r', '--reset',
-                    help='Reset the mcu',
-                    action='store_true')
-common.add_argument('-s', '--size',
-                    help='See the size of the binaries',
-                    action='store_true')
-common.add_argument('-u', '--upload',
-                    action='store_true')
-common.add_argument('-t', '--silent',
-                    action='store_true',
-                    help='Silent mode')
-common.add_argument('-x', '--c-plus-plus',
-                    action='store_true',
-                    help='Build with g++')
+common.add_argument('-c', '--compile', action='store_true')
+common.add_argument('-d', '--debug', help='Start a debugging session', action='store_true')
+common.add_argument('-i', '--info', help='Display ST-Link information', action='store_true')
+common.add_argument('-r', '--reset', help='Reset the mcu', action='store_true')
+common.add_argument('-s', '--size', help='See the size of the binaries', action='store_true')
+common.add_argument('-u', '--upload', action='store_true')
+common.add_argument('-t', '--silent', action='store_true', help='Silent mode')
+common.add_argument('-x', '--c-plus-plus', action='store_true', help='Build with g++')
 
-rare.add_argument('-b', '--binary',
-                    type=str)
-rare.add_argument('-g', '--gcc-path',
-                    type=str)
-rare.add_argument('-m', '--makefile',
-                    type=str,
-                    default='Makefile',
-                    help='Makefile generated with STM32Cube')
-rare.add_argument('-p', '--project-directory',
-                    type=str,
-                    default=os.getcwd())
-rare.add_argument('--flash-address',
-                    type=str,
-                    default='0x8000000')
+rare.add_argument('-b', '--binary', type=str)
+rare.add_argument('-g', '--gcc-path', type=str)
+rare.add_argument('-m', '--makefile', type=str, default='Makefile', help='Makefile generated with STM32Cube')
+rare.add_argument('-p', '--project-directory', type=str, default=os.getcwd())
+rare.add_argument('--flash-address', type=str, default='0x8000000')
 
 args = parser.parse_args()
+
+# CLI text formatting
 
 def bold(text):
   if os.name == 'posix':
@@ -86,9 +68,18 @@ def print_message(message, error=False, success=False, verbose=False):
   elif ((verbose and not args.silent) or not verbose):
     print('{}: {}'.format(bold(prog_name), message))
 
+# Tries to call another program and prints messages
+def call_executable(cmd, error_message):
+  try:
+    if (subprocess.call(cmd)):
+      print_message(error_message, error=True)
+  except FileNotFoundError:
+    print_message('Failed to execute {}. Make sure you\'ve included it in your PATH variable.'.format(cmd[0]))
+
+# Main body of the program
+
 if args.reset:
-  if subprocess.call(['st-flash', 'reset']):
-    print_message('Failed to reset the MCU.', error=True)
+  call_executable(['st-flash', 'reset'], 'Failed to reset the MCU.')
   sys.exit()
 
 if args.info:
