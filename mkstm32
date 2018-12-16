@@ -10,7 +10,7 @@ import subprocess
 start = time.time()
 
 # This executable name
-prog_name = os.path.split(sys.argv[0])[1]
+prog_name = os.path.basename(sys.argv[0])
 
 
 parser = argparse.ArgumentParser(description='Build, upload and debug '
@@ -122,7 +122,7 @@ if args.binary:
   bin_file = args.binary
   elf_file = bin_file
 else:
-  filename_base = os.path.split(args.project_directory)[-1]
+  filename_base = os.path.basename(args.project_directory)
   bin_file = os.path.join(args.project_directory, 'build',
                              filename_base + '.bin')
   elf_file = os.path.join(args.project_directory, 'build',
@@ -156,16 +156,16 @@ if args.debug:
 def fsize(fname):
   with open(fname) as f:
     f.seek(0, 2)
-    return f_tell
+    return f.tell()
 
 if args.size:
   bin_size = fsize(bin_file)
   elf_size = fsize(elf_file)
   hex_size = fsize(hex_file)
   
-  bin_file = os.path.split(bin_file)[1]
-  elf_file = os.path.split(elf_file)[1]
-  hex_file = os.path.split(hex_file)[1]
+  bin_file = os.path.basename(bin_file)
+  elf_file = os.path.basename(elf_file)
+  hex_file = os.path.basename(hex_file)
 
   print_message('\n\t{}: {} B\n\t{}: {} B\n\t{}: {} B'.format(bin_file,
                                                               bin_size,
@@ -200,7 +200,7 @@ if args.compile:
 
 if args.upload:
   print_message('Uploading {} '
-    'to the microcontroller.'.format(bold(os.path.split(bin_file)[-1])),
+    'to the microcontroller.'.format(bold(os.path.basename(bin_file))),
                 verbose=True)
 
 
