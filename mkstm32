@@ -11,23 +11,25 @@ gcc_path = None
 
 # CLI text formatting
 
+def cli_format(func):
+  def wrapper(text):
+    if os.name == 'posix':
+      return func(text)
+    else:
+      return text
+  return wrapper
+
+@cli_format
 def bold(text):
-  if os.name == 'posix':
-    return '\033[1m{}\033[0m'.format(text)
-  else:
-    return text
+  return '\033[1m{}\033[0m'.format(text)
 
+@cli_format
 def green(text):
-  if os.name == 'posix':
-    return '\033[32m{}\033[0m'.format(text)
-  else:
-    return text
+  return '\033[32m{}\033[0m'.format(text)
 
+@cli_format
 def red(text):
-  if os.name == 'posix':
-    return '\033[31m{}\033[0m'.format(text)
-  else:
-    return text
+  return '\033[31m{}\033[0m'.format(text)
 
 def print_message(message, error=False, success=False, verbose=False):
   if success:
