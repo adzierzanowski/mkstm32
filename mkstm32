@@ -191,11 +191,12 @@ if args.compile:
     makefile = args.makefile
 
   print_message('Cleaning build directory.', verbose=True)
+  cleaning_fail_msg = 'Failed to clean build directory.'
   if os.name == 'posix':
     call_executable(['make', '-f', args.makefile, 'clean'],
-                    'Failed to clean build directory.')
+                    cleaning_fail_msg)
   elif os.name == 'nt':
-    call_executable(['del', 'build'])
+    call_executable(['del', 'build'], cleaning_fail_msg)
 
   print_message('Calling make.', verbose=True)
   call_executable(['make', '-f', makefile], 'Failed to successfully execute make.')
