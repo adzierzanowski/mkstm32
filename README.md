@@ -45,3 +45,8 @@ Resetting the MCU:
 Getting information about the ST-Link connection:
 
     $ mkstm32 -i   
+
+### Notice
+
+As for now the name of build directory is hard-coded to `build` as
+in default Cube-generated makefiles.
