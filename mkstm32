@@ -190,8 +190,8 @@ if args.compile:
     print_message('Compiling for C.', verbose=True)
     makefile = args.makefile
 
-  print_message('Cleaning build directory.', verbose=True)
   if os.name == 'posix':
+    print_message('Cleaning build directory.', verbose=True)
     call_executable(['make', '-f', args.makefile, 'clean'],
                     'Failed to clean build directory.')
 
