@@ -187,10 +187,9 @@ if args.compile:
   if args.c_plus_plus:
     print_message('Compiling for C++.', verbose=True)
     generate_cpp_makefile()
-    makefile = os.path.join(args.project_directory, cpp_makefile)
+    args.makefile = os.path.join(args.project_directory, cpp_makefile)
   else:
     print_message('Compiling for C.', verbose=True)
-    makefile = args.makefile
 
   print_message('Cleaning build directory.', verbose=True)
   cleaning_fail_msg = 'Failed to clean build directory.'
@@ -201,7 +200,7 @@ if args.compile:
     shutil.rmtree(os.path.join(args.project_directory, args.build_dir))
 
   print_message('Calling make.', verbose=True)
-  call_executable(['make', '-f', makefile], 'Failed to successfully execute make.')
+  call_executable(['make', '-f', args.makefile], 'Failed to successfully execute make.')
 
   print_message('Successfully compiled firmware.',
                 verbose=True, success=True)
