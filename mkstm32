@@ -51,6 +51,7 @@ def call_executable(cmd, error_message):
   except FileNotFoundError:
     print_message('Failed to execute {}. Make sure you\'ve included it in your PATH.'.format(cmd[0]), error=True)
 
+# Returns size of a file
 def fsize(fname):
   with open(fname) as f:
     f.seek(0, 2)
@@ -102,6 +103,10 @@ rare.add_argument('-p', '--project-directory', type=str, default=os.getcwd())
 rare.add_argument('--flash-address', type=str, default='0x8000000')
 
 args = parser.parse_args()
+
+if args.project_directory != os.getcwd():
+  args.makefile = os.path.join(args.project_directory, args.makefile)
+  os.chdir(args.project_directory)
 
 if args.gcc_path:
   gcc_path = args.gcc_path
@@ -180,7 +185,7 @@ if args.compile:
   if args.c_plus_plus:
     print_message('Compiling for C++.', verbose=True)
     generate_cpp_makefile()
-    makefile = cpp_makefile
+    makefile = os.path.join(args.project_directory, cpp_makefile)
   else:
     print_message('Compiling for C.', verbose=True)
     makefile = args.makefile
