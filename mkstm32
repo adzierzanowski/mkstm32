@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import shutil
 import argparse
 import subprocess
 
@@ -196,7 +197,7 @@ if args.compile:
     call_executable(['make', '-f', args.makefile, 'clean'],
                     cleaning_fail_msg)
   elif os.name == 'nt':
-    call_executable(['del', 'build'], cleaning_fail_msg)
+    shutil.rmtree(os.path.join(args.project_directory, 'build'))
 
   print_message('Calling make.', verbose=True)
   call_executable(['make', '-f', makefile], 'Failed to successfully execute make.')
