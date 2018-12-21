@@ -102,6 +102,7 @@ rare.add_argument('-g', '--gcc-path', type=str)
 rare.add_argument('-m', '--makefile', type=str, default='Makefile', help='Makefile generated with STM32Cube')
 rare.add_argument('-p', '--project-directory', type=str, default=os.getcwd())
 rare.add_argument('--flash-address', type=str, default='0x8000000')
+rare.add_argument('--build-dir', type=str, help='Build directory name', default='build')
 
 args = parser.parse_args()
 
@@ -122,11 +123,11 @@ if args.binary:
   elf_file = bin_file
 else:
   filename_base = os.path.basename(args.project_directory)
-  bin_file = os.path.join(args.project_directory, 'build',
+  bin_file = os.path.join(args.project_directory, args.build_dir,
                              filename_base + '.bin')
-  elf_file = os.path.join(args.project_directory, 'build',
+  elf_file = os.path.join(args.project_directory, args.build_dir,
                           filename_base + '.elf')
-  hex_file = os.path.join(args.project_directory, 'build',
+  hex_file = os.path.join(args.project_directory, args.build_dir,
                           filename_base + '.hex')
 
 
@@ -197,7 +198,7 @@ if args.compile:
     call_executable(['make', '-f', args.makefile, 'clean'],
                     cleaning_fail_msg)
   elif os.name == 'nt':
-    shutil.rmtree(os.path.join(args.project_directory, 'build'))
+    shutil.rmtree(os.path.join(args.project_directory, args.build_dir))
 
   print_message('Calling make.', verbose=True)
   call_executable(['make', '-f', makefile], 'Failed to successfully execute make.')
