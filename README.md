@@ -23,6 +23,34 @@ enviroment variable (inlcuding this script)
 using mingw32, you should use `make.exe` from `MinGW\msys\1.0\bin` rather
 than `mingw32-make.exe` from `MinGW\bin` or rename `mingw32-make.exe` to `make.exe`).
 
+# usage
+
+    usage: mkstm32 [-h] [-u] [-d] [-v VERBOSITY] [-c] [-p DIR] [-s] [-x] [-z] [-i]
+               [-r]
+
+    Upload, debug and compile STM32CubeMX Makefile projects
+
+    optional arguments:
+    -h, --help            show this help message and exit
+
+    Common operations:
+    -u, --upload
+    -d, --debug           Start GDB session
+    -v VERBOSITY, --verbosity VERBOSITY
+                            Verbosity level (0-3)
+
+    Project operations:
+    -c, --compile         Call make with appropriate Makefile
+    -p DIR, --project-dir DIR
+                            Defaults to current dir
+    -s, --size            Print size of built binaries
+    -x, --cpp             Use C++ rather than C
+    -z, --clean           Clean (remove) build directory
+
+    ST-Link operations:
+    -i, --probe           Print ST-Link connection information
+    -r, --reset           Reset the microcontroller
+
 # examples
 
 Compiling:
