@@ -58,7 +58,7 @@ Say we want to compile, upload and debug a project in directory `F042_test`.
     mkstm32 -zxcudp F042_Test
 
 * `-z` switch removes build directory.
-* `-x` is a flag that tells the script to covert Cube Makefile to C++ Makefile.
+* `-x` is a flag that tells the script to convert Cube Makefile to C++ Makefile.
 * `-c` stands for compile.
 * `-u` uploads compiled project to the microcontroller.
 * `-d` starts a GDB debugging session after compilation and upload.
