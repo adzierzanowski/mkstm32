@@ -74,6 +74,7 @@ class Project:
   cpp_makefile = 'Makefile_cpp.mk'
 
   def __init__(self, dir_, cpp=False):
+    self.start = None
     self.dir = os.path.abspath(dir_)
     self.cpp = cpp
     self.build_dir = 'build'
@@ -86,17 +87,20 @@ class Project:
 
     os.chdir(self.dir)
 
+  def __enter__(self):
+    self.start = time.time()
+    return self
+
+  def __exit__(self, ex_type, ex_val, traceback):
+    took = time.time() - self.start
+    if took > 0.01:
+      cli.print('Done in {0:0.2f} seconds.'.format(time.time() - self.start))
+
   def path(self, file_=''):
     return os.path.join(self.dir, file_)
 
   def name(self):
     return os.path.basename(self.dir)
-
-  def __enter__(self):
-    return self
-
-  def __exit__(self, ex_type, ex_val, traceback):
-    pass
 
   def compile(self):
     success_msg = 'Successfuly compiled firmware'
@@ -224,7 +228,6 @@ if __name__ == '__main__':
   with Project(args.project_dir, cpp=args.cpp) as project:
     if args.size:
       project.size()
-      sys.exit()
 
     if args.clean:
       project.clean()
@@ -237,6 +240,3 @@ if __name__ == '__main__':
 
     if args.debug:
       project.debug()
-
-    end = time.time() - start
-    cli.print('Done in {0:0.2f} seconds.'.format(end))
