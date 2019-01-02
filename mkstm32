@@ -83,8 +83,6 @@ class Project:
     self.elf = self.path(os.path.join(self.build_dir, self.name() + '.elf'))
     self.hex = self.path(os.path.join(self.build_dir, self.name() + '.hex'))
 
-    self.binaries = [self.bin, self.elf, self.hex]
-
     os.chdir(self.dir)
 
   def __enter__(self):
@@ -160,7 +158,7 @@ class Project:
       cli.print('Done.', verbosity_level=2)
 
   def size(self):
-    for file_ in self.binaries:
+    for file_ in [self.bin, self.elf, self.hex]:
       with open(file_, 'r') as f:
         f.seek(0, 2)
         cli.print('  {}: {} B'.format(os.path.basename(file_), f.tell()))
