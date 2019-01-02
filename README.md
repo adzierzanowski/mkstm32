@@ -53,22 +53,15 @@ than `mingw32-make.exe` from `MinGW\bin` or rename `mingw32-make.exe` to `make.e
 
 # examples
 
-Compiling:
+Say we want to compile, upload and debug a project in directory `F042_test`.
 
-    $ mkstm32 -c
+    mkstm32 -zxcudp F042_Test
 
-Cleaning build directory, generating C++ Makefile from the default one, compiling and uploading:
+* `-z` switch removes build directory.
+* `-x` is a flag that tells the script to covert Cube Makefile to C++ Makefile.
+* `-c` stands for compile.
+* `-u` uploads compiled project to the microcontroller.
+* `-d` starts a GDB debugging session after compilation and upload.
+* `-p` specifies the project directory.
 
-    $ mkstm32 -zcxu
-
-Starting a debug session using `st-util` and GDB:
-
-    $ mkstm32 -d
-
-Resetting the MCU:
-
-    $ mkstm32 -r
-    
-Getting information about the ST-Link connection:
-
-    $ mkstm32 -i   
+Et voilà.
