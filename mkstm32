@@ -7,9 +7,12 @@ import shutil
 import argparse
 import subprocess
 
+# Checks for ANSI escape codes support
 def formatter(func):
   def wrapper(text):
-    if os.name == 'posix':
+    posix_support = os.name == 'posix' and hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+    win_support = os.name == 'nt' and 'ANSICON' in os.environ
+    if posix_support or win_support:
       return func(text)
     return text
 
@@ -61,6 +64,9 @@ class CLI:
       cli.print('Command not found: {}.'.format(arglist[0]), error=True)
       cli.print('Make sure you\'ve included all the necessary executables in your PATH')
       cli.print('see README.md for more information')
+      sys.exit(1)
+    except KeyboardInterrupt:
+      cli.print('{} interrupted.'.format(arglist[0]), error=True)
       sys.exit(1)
 
 class Project:
