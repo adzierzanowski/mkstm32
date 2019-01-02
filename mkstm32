@@ -19,8 +19,9 @@ def formatter(func):
   return wrapper
 
 class CLI:
-  def __init__(self, verbosity_level=0):
-    self.verbosity_level = verbosity_level
+  def __init__(self, verbosity=0):
+    self.verbosity = verbosity
+    self.footprint = CLI.bold(os.path.basename(__file__)) + ':'
 
   @staticmethod
   @formatter
@@ -37,20 +38,20 @@ class CLI:
   def green(text):
     return '{}{}{}'.format('\033[32m', text, '\033[0m')
 
-  def print(self, text, verbosity_level=0, success=False, error=False):
-    if self.verbosity_level < verbosity_level:
+  def print(self, text, verbosity=0, success=False, error=False):
+    if self.verbosity < verbosity:
       return
 
     if error:
-      sys.stderr.write(CLI.bold('mkstm32: ' + CLI.red(text)) + '\n')
+      sys.stderr.write('{} {}\n'.format(self.footprint, CLI.bold(CLI.red(text))))
     elif success:
-      print(CLI.bold('mkstm32:'), CLI.green(text))
+      print(self.footprint, CLI.bold(CLI.green(text)))
     else:
-      print(CLI.bold('mkstm32:'), text)
+      print(self.footprint, text)
 
   def call(self, arglist, exit_on_error=True, success_message=None):
     kwargs = {}
-    if self.verbosity_level == 0:
+    if self.verbosity < 1:
       kwargs = {'stdout': subprocess.DEVNULL, 'stderr': subprocess.DEVNULL}
 
     try:
@@ -59,7 +60,7 @@ class CLI:
         if exit_on_error:
           sys.exit(1)
       elif success_message is not None:
-        cli.print(success_message, success=True)
+        cli.print(success_message, success=True, verbosity=2)
     except FileNotFoundError:
       cli.print('Command not found: {}.'.format(arglist[0]), error=True)
       cli.print('Make sure you\'ve included all the necessary executables in your PATH')
@@ -92,7 +93,7 @@ class Project:
   def __exit__(self, ex_type, ex_val, traceback):
     took = time.time() - self.start
     if took > 0.01:
-      cli.print('Done in {0:0.2f} seconds.'.format(time.time() - self.start))
+      cli.print('Done in {0:0.2f} seconds.'.format(time.time() - self.start), verbosity=2)
 
   def path(self, file_=''):
     return os.path.join(self.dir, file_)
@@ -103,12 +104,12 @@ class Project:
   def compile(self):
     success_msg = 'Successfuly compiled firmware'
     if self.cpp:
-      cli.print('Compiling for C++', verbosity_level=2)
+      cli.print('Compiling for C++', verbosity=1)
       self.generate_cpp_makefile()
       cli.call(['make', '-f', self.path(Project.cpp_makefile)],
         success_message=success_msg)
     else:
-      cli.print('Compiling for C', verbosity_level=2)
+      cli.print('Compiling for C', verbosity=1)
       cli.call(['make', '-f', self.path(Project.standard_makefile)],
         success_message=success_msg)
 
@@ -134,10 +135,10 @@ class Project:
       success_message='Successfully uploaded firmware.')
 
   def debug(self):
-    cli.print('Starting GDB server', verbosity_level=2)
+    cli.print('Starting GDB server', verbosity=1)
 
     kwargs = {}
-    if cli.verbosity_level < 3:
+    if cli.verbosity < 3:
       kwargs = {'stdout': subprocess.DEVNULL, 'stderr': subprocess.DEVNULL}
 
     gdb_server = subprocess.Popen(['st-util'], **kwargs)
@@ -146,16 +147,16 @@ class Project:
     if gdb_server.poll():
       cli.print('Failed to start GDB server.', error=True)
     else:
-      cli.print('Successfully started GDB server.', verbosity_level=2)
+      cli.print('Successfully started GDB server.', verbosity=2)
 
     try:
       cli.call(['arm-none-eabi-gdb', self.elf, '-ex', 'tar extended-remote :4242'])
     except KeyboardInterrupt:
       pass
     finally:
-      cli.print('Closing GDB server.', verbosity_level=2)
+      cli.print('Closing GDB server.', verbosity=1)
       gdb_server.kill()
-      cli.print('Done.', verbosity_level=2)
+      cli.print('GDB server killed.', verbosity=2)
 
   def size(self):
     for file_ in [self.bin, self.elf, self.hex]:
@@ -164,11 +165,11 @@ class Project:
         cli.print('  {}: {} B'.format(os.path.basename(file_), f.tell()))
 
   def clean(self):
-    cli.print('Cleaning build directory.', verbosity_level=2)
+    cli.print('Cleaning build directory.', verbosity=1)
 
     try:
       shutil.rmtree(self.build_dir)
-      cli.print('Successfully cleaned build directory.', verbosity_level=1, success=True)
+      cli.print('Successfully cleaned build directory.', verbosity=2, success=True)
     except FileNotFoundError:
       cli.print('Build directory doesn\'t exist', error=True)
 
@@ -190,7 +191,8 @@ if __name__ == '__main__':
   common_ops = parser.add_argument_group(title='Common operations')
   common_ops.add_argument('-u', '--upload', action='store_true')
   common_ops.add_argument('-d', '--debug', action='store_true', help='Start GDB session')
-  common_ops.add_argument('-v', '--verbosity', help='Verbosity level (0-3)', type=int, default=2)
+  common_ops.add_argument('-v', '--verbosity', type=int, default=2, metavar='V',
+    help='Verbosity level from -1 (completely silent) to 2 (fully verbose, default)')
 
   project_ops = parser.add_argument_group(title='Project operations')
   project_ops.add_argument('-c', '--compile', action='store_true',
@@ -207,13 +209,13 @@ if __name__ == '__main__':
     help='Print ST-Link connection information')
   stlink_ops.add_argument('-r', '--reset', action='store_true', help='Reset the microcontroller')
 
-  args = parser.parse_args()
-
-  cli = CLI(verbosity_level=args.verbosity)
-
   if len(sys.argv) < 2:
     parser.print_help()
     sys.exit()
+    
+  args = parser.parse_args()
+
+  cli = CLI(verbosity=args.verbosity)
 
   if args.reset:
     STLink.reset()

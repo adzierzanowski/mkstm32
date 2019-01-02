@@ -32,8 +32,7 @@ for colorful messages. It's way easier to skim through the output.
 
 # usage
 
-    usage: mkstm32 [-h] [-u] [-d] [-v VERBOSITY] [-c] [-p DIR] [-s] [-x] [-z] [-i]
-               [-r]
+    usage: mkstm32 [-h] [-u] [-d] [-v V] [-c] [-p DIR] [-s] [-x] [-z] [-i] [-r]
 
     Upload, debug and compile STM32CubeMX Makefile projects
 
@@ -43,8 +42,8 @@ for colorful messages. It's way easier to skim through the output.
     Common operations:
     -u, --upload
     -d, --debug           Start GDB session
-    -v VERBOSITY, --verbosity VERBOSITY
-                            Verbosity level (0-3)
+    -v V, --verbosity V   Verbosity level from -1 (completely silent) to 2
+                            (fully verbose, default)
 
     Project operations:
     -c, --compile         Call make with appropriate Makefile
