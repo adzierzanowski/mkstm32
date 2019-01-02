@@ -50,12 +50,18 @@ class CLI:
     if self.verbosity_level == 0:
       kwargs = {'stdout': subprocess.DEVNULL, 'stderr': subprocess.DEVNULL}
 
-    if subprocess.call(arglist, **kwargs):
-      self.print('Failure while executing {}.\n'.format(arglist[0]), error=True)
-      if exit_on_error:
-        sys.exit(1)
-    elif success_message is not None:
-      cli.print(success_message, success=True)
+    try:
+      if subprocess.call(arglist, **kwargs):
+        self.print('Failure while executing {}.\n'.format(arglist[0]), error=True)
+        if exit_on_error:
+          sys.exit(1)
+      elif success_message is not None:
+        cli.print(success_message, success=True)
+    except FileNotFoundError:
+      cli.print('Command not found: {}.'.format(arglist[0]), error=True)
+      cli.print('Make sure you\'ve included all the necessary executables in your PATH')
+      cli.print('see README.md for more information')
+      sys.exit(1)
 
 class Project:
   standard_makefile = 'Makefile'
