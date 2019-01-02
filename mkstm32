@@ -59,7 +59,7 @@ class Project:
   cpp_makefile  = 'Makefile_cpp.mk'
 
   def __init__(self, dir_, cpp=False):
-    self.dir = dir_
+    self.dir = os.path.abspath(dir_)
     self.cpp = cpp
     self.build_dir = 'build'
 
