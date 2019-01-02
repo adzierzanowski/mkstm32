@@ -184,8 +184,6 @@ class STLink:
 
 
 if __name__ == '__main__':
-  start = time.time()
-
   parser = argparse.ArgumentParser(
     description='Upload, debug and compile STM32CubeMX Makefile projects')
 
