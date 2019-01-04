@@ -9,6 +9,7 @@ import subprocess
 
 try:
   import serial
+  from serial.tools.list_ports import comports
 except ImportError:
   pass
 
@@ -193,6 +194,23 @@ class STLink:
   @staticmethod
   def monitor(port):
     if 'serial' in imports:
+      if port is None:
+        ports = comports()
+        if len(ports) > 0:
+          cli.print('Choose one of the following ports:')
+          for i, p in enumerate(ports):
+            cli.print('[{0}] {1:40} {2:20}'.format(i, p.device, p.description))
+          try:
+            choice = input('> ')
+            port = ports[int(choice)].device
+          except IndexError:
+            cli.print('No valid port chosen.', error='True')
+            sys.exit(1)
+          except KeyboardInterrupt:
+            sys.exit()
+        else:
+          cli.print('No COM ports available.', error=True)
+
       s = None
       try:
         s = serial.Serial(port=port)
@@ -204,7 +222,7 @@ class STLink:
 
       try:
         while True:
-          print(s.read().decode('utf8'), end='')
+          sys.stdout.write(s.read().decode('utf8'))
       except KeyboardInterrupt:
         sys.exit()
 
@@ -212,7 +230,7 @@ class STLink:
     elif os.name == 'posix':
       cli.call(['cat', port])
     else:
-      cli.print('`serial` module not installed. Try installing `pyserial` with pip,', error=True)
+      cli.print('`serial` module not installed. Try installing `pyserial` with pip.', error=True)
       sys.exit(1)
 
 if __name__ == '__main__':
@@ -238,7 +256,8 @@ if __name__ == '__main__':
   stlink_ops = parser.add_argument_group(title='ST-Link operations')
   stlink_ops.add_argument('-i', '--probe', action='store_true',
     help='Print ST-Link connection information')
-  stlink_ops.add_argument('-m', '--monitor', type=str, metavar='PORT', help='Serial monitor')
+  stlink_ops.add_argument('-m', '--monitor', action='store_true', help='Serial monitor')
+  stlink_ops.add_argument('-P', '--port', type=str, metavar='PORT')
   stlink_ops.add_argument('-r', '--reset', action='store_true', help='Reset the microcontroller')
 
   if len(sys.argv) < 2:
@@ -256,7 +275,7 @@ if __name__ == '__main__':
     STLink.probe()
 
   if args.monitor:
-    STLink.monitor(args.monitor)
+    STLink.monitor(args.port)
 
   with Project(args.project_dir, cpp=args.cpp) as project:
     if args.size:
