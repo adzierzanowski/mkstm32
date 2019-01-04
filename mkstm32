@@ -7,6 +7,13 @@ import shutil
 import argparse
 import subprocess
 
+try:
+  import serial
+except ImportError:
+  pass
+
+imports = dir()
+
 # Checks for ANSI escape codes support
 def formatter(func):
   def wrapper(text):
@@ -162,7 +169,7 @@ class Project:
     for file_ in [self.bin, self.elf, self.hex]:
       with open(file_, 'r') as f:
         f.seek(0, 2)
-        cli.print('  {}: {} B'.format(os.path.basename(file_), f.tell()))
+        cli.print('{}: {} B'.format(os.path.basename(file_), f.tell()))
 
   def clean(self):
     cli.print('Cleaning build directory.', verbosity=1)
@@ -183,6 +190,30 @@ class STLink:
   def reset():
     cli.call(['st-flash', 'reset'])
 
+  @staticmethod
+  def monitor(port):
+    if 'serial' in imports:
+      s = None
+      try:
+        s = serial.Serial(port=port)
+      except serial.serialutil.SerialException:
+        cli.print('Serial port failure: {}'.format(port), error=True)
+
+      if s is None:
+        sys.exit(1)
+
+      try:
+        while True:
+          print(s.read().decode('utf8'), end='')
+      except KeyboardInterrupt:
+        sys.exit()
+
+    # If pyserial not found but OS is POSIX then just call cat
+    elif os.name == 'posix':
+      cli.call(['cat', port])
+    else:
+      cli.print('`serial` module not installed. Try installing `pyserial` with pip,', error=True)
+      sys.exit(1)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(
@@ -207,6 +238,7 @@ if __name__ == '__main__':
   stlink_ops = parser.add_argument_group(title='ST-Link operations')
   stlink_ops.add_argument('-i', '--probe', action='store_true',
     help='Print ST-Link connection information')
+  stlink_ops.add_argument('-m', '--monitor', type=str, metavar='PORT', help='Serial monitor')
   stlink_ops.add_argument('-r', '--reset', action='store_true', help='Reset the microcontroller')
 
   if len(sys.argv) < 2:
@@ -222,6 +254,9 @@ if __name__ == '__main__':
 
   if args.probe:
     STLink.probe()
+
+  if args.monitor:
+    STLink.monitor(args.monitor)
 
   with Project(args.project_dir, cpp=args.cpp) as project:
     if args.size:
