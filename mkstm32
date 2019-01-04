@@ -71,8 +71,8 @@ class CLI:
         cli.print(success_message, success=True, verbosity=2)
     except FileNotFoundError:
       cli.print('Command not found: {}.'.format(arglist[0]), error=True)
-      cli.print('Make sure you\'ve included all the necessary executables in your PATH')
-      cli.print('see README.md for more information')
+      cli.print('Make sure you\'ve included all the necessary executables in your PATH.')
+      cli.print('See README.md for more information.')
       sys.exit(1)
     except KeyboardInterrupt:
       cli.print('{} interrupted.'.format(arglist[0]), error=True)
@@ -143,7 +143,7 @@ class Project:
       success_message='Successfully uploaded firmware.')
 
   def debug(self):
-    cli.print('Starting GDB server', verbosity=1)
+    cli.print('Starting GDB server.', verbosity=1)
 
     kwargs = {}
     if cli.verbosity < 3:
@@ -179,7 +179,7 @@ class Project:
       shutil.rmtree(self.build_dir)
       cli.print('Successfully cleaned build directory.', verbosity=2, success=True)
     except FileNotFoundError:
-      cli.print('Build directory doesn\'t exist', error=True)
+      cli.print('Build directory doesn\'t exist.', error=True)
 
 
 class STLink:
