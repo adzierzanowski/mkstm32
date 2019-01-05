@@ -32,7 +32,8 @@ for colorful messages. It's way easier to skim through the output.
 
 # usage
 
-    usage: mkstm32 [-h] [-u] [-d] [-v V] [-c] [-p DIR] [-s] [-x] [-z] [-i] [-r]
+    usage: mkstm32 [-h] [-u] [-d] [-v V] [-c] [-p DIR] [-s] [-x] [-z] [-i] [-m]
+               [-P PORT] [-r]
 
     Upload, debug and compile STM32CubeMX Makefile projects
 
@@ -55,6 +56,8 @@ for colorful messages. It's way easier to skim through the output.
 
     ST-Link operations:
     -i, --probe           Print ST-Link connection information
+    -m, --monitor         Serial monitor
+    -P PORT, --port PORT
     -r, --reset           Reset the microcontroller
 
 # examples
