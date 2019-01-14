@@ -12,17 +12,20 @@ Following programs are required to be included in `$PATH`:
 * [texane/stlink](https://github.com/texane/stlink) binaries (`st-flash`,
 `st-util`, `st-info`)
 
-Should work on macOS and linux.
+# installation
+
+    git clone https://github.com/adzierzanowski/mkstm32.git
+    pip3 install mkstm32
 
 # Windows things
 
+I tried to make this script as platform independent as I could.
 All of the required software is available for Windows.
 You should be able to run this script after:
 
 * installing python3
 * adding the extension to the script file: `mkstm32.py`
 * making sure you have added all the neccessary programs to `PATH`
-enviroment variable (inlcuding this script)
 * making sure all of those programs are named properly (e.g. if you're
 using mingw32, you should use `make.exe` from `MinGW\msys\1.0\bin` rather
 than `mingw32-make.exe` from `MinGW\bin` or rename `mingw32-make.exe` to `make.exe`).
@@ -74,3 +77,7 @@ Say we want to compile, upload and debug a project in directory `F042_test`.
 * `-p` specifies the project directory.
 
 Et voilà.
+
+# TODO
+
+When uploading and there's more than one serial port, user should be able to choose one.
