@@ -1,9 +1,8 @@
 from setuptools import setup
-import mkstm32
 
 setup(
   name='mkstm32',
-  version=mkstm32.__version__,
+  version='1.0.4',
   description='Upload, debug and compile STM32CubeMX Makefile projects',
   url='https://github.com/adzierzanowski/mkstm32',
   author='Aleksander Dzierżanowski',
