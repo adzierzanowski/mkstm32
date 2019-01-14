@@ -12,10 +12,10 @@ Following programs are required to be included in `$PATH`:
 * [texane/stlink](https://github.com/texane/stlink) binaries (`st-flash`,
 `st-util`, `st-info`)
 
-# installation
+# setup 
 
     git clone https://github.com/adzierzanowski/mkstm32.git
-    pip3 install mkstm32
+    pip3 install ./mkstm32
 
 # Windows things
 

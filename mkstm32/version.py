@@ -11,6 +11,6 @@ class Version:
     return '{}.{}.{}'.format(Version.major, Version.minor, Version.patch)
 
   @staticmethod
-  def print(cli):
-    cli.print('Version {} ({})'.format(Version.str_(), Version.date))
+  def print():
+    print('mkstm32 v{} ({})'.format(Version.str_(), Version.date))
     sys.exit()

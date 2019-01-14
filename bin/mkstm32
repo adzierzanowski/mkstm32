@@ -47,7 +47,7 @@ if __name__ == '__main__':
   stlink = STLink(cli)
 
   if args.version:
-    Version.print(cli)
+    Version.print()
 
   if args.reset:
     stlink.reset()
