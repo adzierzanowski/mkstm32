@@ -37,7 +37,7 @@ class CLI:
 
   def choose_port(self):
     ports = comports()
-    if not ports:
+    if ports:
       self.print('Choose one of the following ports:')
       for i, p in enumerate(ports):
         self.print('[{0}] {1:40} {2:20}'.format(i, p.device, p.description))

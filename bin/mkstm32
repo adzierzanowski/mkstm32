@@ -7,7 +7,7 @@ import argparse
 from mkstm32.cli import CLI
 from mkstm32.stlink import STLink
 from mkstm32.project import Project
-from mkstm32.version import Version
+from mkstm32 import __version__
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(
@@ -47,7 +47,8 @@ if __name__ == '__main__':
   stlink = STLink(cli)
 
   if args.version:
-    Version.print()
+    cli.print(__version__)
+    sys.exit()
 
   if args.reset:
     stlink.reset()
