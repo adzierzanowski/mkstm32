@@ -24,7 +24,6 @@ All of the required software is available for Windows.
 You should be able to run this script after:
 
 * installing python3
-* adding the extension to the script file: `mkstm32.py`
 * making sure you have added all the neccessary programs to `PATH`
 * making sure all of those programs are named properly (e.g. if you're
 using mingw32, you should use `make.exe` from `MinGW\msys\1.0\bin` rather
