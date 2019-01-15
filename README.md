@@ -77,6 +77,7 @@ Say we want to compile, upload and debug a project in directory `F042_test`.
 
 Et voilà.
 
-# TODO
+# todo
 
-When uploading and there's more than one serial port, user should be able to choose one.
+* Some refactoring.
+* See if it really works on Windows (it does but it can do better, I think)

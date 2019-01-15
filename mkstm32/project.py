@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import shutil
 import subprocess
@@ -7,8 +8,9 @@ class Project:
   standard_makefile = 'Makefile'
   cpp_makefile = 'Makefile_cpp.mk'
 
-  def __init__(self, dir_, cli, cpp=False):
+  def __init__(self, dir_, cli, stlink, cpp=False):
     self.cli = cli
+    self.stlink = stlink
     self.start = None
     self.dir = os.path.abspath(dir_)
     self.cpp = cpp
@@ -64,9 +66,29 @@ class Project:
     with open(self.path(Project.cpp_makefile), 'w') as f:
       f.write('\n'.join(splitdata))
 
+  # TODO: refactor this method
   def upload(self):
-    self.cli.call(['st-flash', 'write', self.bin, '0x8000000'],
-      success_message='Successfully uploaded firmware.')
+    devices = self.stlink.devices()
+
+    if devices['count'] > 1:
+      self.cli.print('Choose one of the following devices')
+      for i, p in enumerate(devices['devices']):
+        self.cli.print('[{0}] {1:20} {2:40}'.format(i, p[0], p[1]))
+      try:
+        choice = input('> ')
+        serial = devices['devices'][int(choice)][1]
+        self.cli.call(['st-flash', '--serial', serial, 'write', self.bin, '0x8000000'],
+          success_message='Successfully uploaded firmware.')
+
+      except IndexError:
+        self.cli.print('No valid device chosen.', error='True')
+        sys.exit(1)
+      except KeyboardInterrupt:
+        sys.exit()
+
+    else:
+      self.cli.call(['st-flash', 'write', self.bin, '0x8000000'],
+        success_message='Successfully uploaded firmware.')
 
   def debug(self):
     self.cli.print('Starting GDB server.', verbosity=1)

@@ -59,7 +59,7 @@ if __name__ == '__main__':
   if args.monitor:
     stlink.monitor(args.port)
 
-  with Project(args.project_dir, cli, cpp=args.cpp) as project:
+  with Project(args.project_dir, cli, stlink, cpp=args.cpp) as project:
     if args.size:
       project.size()
 
