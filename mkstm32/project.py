@@ -70,6 +70,7 @@ class Project:
       f.write('\n'.join(splitdata))
 
   # TODO: refactor this method
+  # TODO: merge boilerplate code
   def upload(self):
     devices = [Option('{0:20} {1:40}'.format(device[0],
               device[1]), device) for device in STLink.devices()]
@@ -86,7 +87,16 @@ class Project:
       self.cli.call(['st-flash', 'write', self.bin, '0x8000000'],
         success_message='Successfully uploaded firmware.')
 
+  # TODO: merge boilerplate code
   def debug(self):
+    devices = STLink.devices()
+    if not devices:
+      self.cli.print('No ST-Link devices found.')
+      sys.exit(1)
+    
+    if len(devices) > 1:
+      self.cli.choose([Option('{0:20} {1:40}'.format(device[0],
+                      device[1]), device) for device in STLink.devices()])
     self.cli.print('Starting GDB server.', verbosity=1)
 
     kwargs = {}
