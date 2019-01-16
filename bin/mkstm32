@@ -7,7 +7,7 @@ import argparse
 from mkstm32.cli import CLI
 from mkstm32.stlink import STLink
 from mkstm32.project import Project
-from mkstm32 import __version__
+from mkstm32.version import __version__
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(
@@ -67,7 +67,7 @@ if __name__ == '__main__':
       project.clean()
 
     if args.compile:
-      project.compile()
+      project.make()
 
     if args.upload:
       project.upload()

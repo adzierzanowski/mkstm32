@@ -1,29 +1,28 @@
 import os
+import sys
 import time
 import shutil
 import subprocess
 
-from mkstm32.cli import Option
+from mkstm32.helpers import Option
 from mkstm32.stlink import STLink
+from mkstm32.config import Config
 
+# This class is responsible for handling an STM32CubeMX project
 class Project:
-  standard_makefile = 'Makefile'
-  cpp_makefile = 'Makefile_cpp.mk'
-
   def __init__(self, dir_, cli, stlink, cpp=False):
     self.cli = cli
     self.stlink = stlink
-    self.start = None
+
     self.dir = os.path.abspath(dir_)
     self.cpp = cpp
-    self.build_dir = 'build'
 
-    self.bin = self.path(os.path.join(self.build_dir, self.name() + '.bin'))
-    self.elf = self.path(os.path.join(self.build_dir, self.name() + '.elf'))
-    self.hex = self.path(os.path.join(self.build_dir, self.name() + '.hex'))
+    self.start = None
 
     os.chdir(self.dir)
 
+  # __enter__ and __exit__ make possible to measure time
+  # using `with` statement
   def __enter__(self):
     self.start = time.time()
     return self
@@ -33,26 +32,31 @@ class Project:
     if took > 0.05:
       self.cli.print('Done in {0:0.2f} seconds.'.format(time.time() - self.start), verbosity=2)
 
+  # Adds an extension to compiled executables based on the project's name
+  def executable(self, ext='.bin'):
+    return self.path(os.path.join(Config.build_dir,
+                     os.path.basename(self.dir) + ext))
+
+  # Returs path relative to the project directory
   def path(self, file_=''):
     return os.path.join(self.dir, file_)
 
-  def name(self):
-    return os.path.basename(self.dir)
-
-  def compile(self):
+  # Calls make and creates makefile for C++ if needed
+  def make(self):
     success_msg = 'Successfuly compiled firmware'
     if self.cpp:
       self.cli.print('Compiling for C++', verbosity=1)
       self.generate_cpp_makefile()
-      self.cli.call(['make', '-f', self.path(Project.cpp_makefile)],
+      self.cli.call(['make', '-f', self.path(Config.cpp_makefile)],
         success_message=success_msg)
     else:
       self.cli.print('Compiling for C', verbosity=1)
-      self.cli.call(['make', '-f', self.path(Project.standard_makefile)],
+      self.cli.call(['make', '-f', self.path(Config.standard_makefile)],
         success_message=success_msg)
 
+  # Converts standard Makefile to C++ Makefile
   def generate_cpp_makefile(self):
-    with open(self.path(Project.standard_makefile), 'r') as f:
+    with open(self.path(Config.standard_makefile), 'r') as f:
       data = f.read()
 
     data = data.replace('gcc', 'g++')
@@ -65,18 +69,22 @@ class Project:
       if 'CFLAGS =' in line:
         splitdata.insert(i+1, 'CFLAGS += -std=c++14')
 
-    with open(self.path(Project.cpp_makefile), 'w') as f:
+    with open(self.path(Config.cpp_makefile), 'w') as f:
       f.write('\n'.join(splitdata))
 
+  # Uploads the project to the microcontroller
   def upload(self):
     serial_ = self.cli.choose_serial()
     if serial_ is None:
-      self.cli.call(['st-flash', 'write', self.bin, '0x8000000'],
+      self.cli.call(['st-flash', 'write', self.executable(), Config.flash_address],
         success_message='Successfully uploaded firmware.')
     else:
-      self.cli.call(['st-flash', '--serial', serial_, 'write', self.bin, '0x8000000'],
-        success_message='Successfully uploaded firmware.')
+      self.cli.call(['st-flash',
+                    '--serial', serial_,
+                    'write', self.executable(), Config.flash_address],
+                    success_message='Successfully uploaded firmware.')
 
+  # Starts a GDB server and calls arm-none-eabi-gdb debugger
   def debug(self):
     serial_ = self.cli.choose_serial()
     if serial_ is None:
@@ -98,7 +106,8 @@ class Project:
       self.cli.print('Successfully started GDB server.', verbosity=2)
 
     try:
-      self.cli.call(['arm-none-eabi-gdb', self.elf, '-ex', 'tar extended-remote :4242'])
+      self.cli.call(['arm-none-eabi-gdb', self.executable('.elf'),
+                    '-ex', 'tar extended-remote :4242'])
     except KeyboardInterrupt:
       pass
     finally:
@@ -106,17 +115,23 @@ class Project:
       gdb_server.kill()
       self.cli.print('GDB server killed.', verbosity=2)
 
+  # Prints size of the compiled binaries
   def size(self):
-    for file_ in [self.bin, self.elf, self.hex]:
-      with open(file_, 'r') as f:
-        f.seek(0, 2)
-        self.cli.print('{}: {} B'.format(os.path.basename(file_), f.tell()))
+    for file_ in [self.executable(ext) for ext in ['.bin', '.elf', '.hex']]:
+      try:
+        with open(file_, 'r') as f:
+          f.seek(0, 2)
+          self.cli.print('{}: {} B'.format(os.path.basename(file_), f.tell()))
+      except FileNotFoundError:
+        self.cli.print('File not found.', error=True)
+        sys.exit(1)
 
+  # Cleans the build directory
   def clean(self):
     self.cli.print('Cleaning build directory.', verbosity=1)
 
     try:
-      shutil.rmtree(self.build_dir)
+      shutil.rmtree(Config.build_dir)
       self.cli.print('Successfully cleaned build directory.', verbosity=2, success=True)
     except FileNotFoundError:
       self.cli.print('Build directory doesn\'t exist.', error=True)

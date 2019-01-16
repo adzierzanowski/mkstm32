@@ -2,10 +2,11 @@ import os
 import sys
 import subprocess
 
-from mkstm32.option import Option
+from mkstm32.helpers import Option
 from mkstm32.stlink import STLink
 
 # Checks for ANSI escape codes support
+# Those are responsible for colorful messages
 def formatter(func):
   def wrapper(text):
     posix_support = os.name == 'posix' and hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
@@ -16,10 +17,12 @@ def formatter(func):
 
   return wrapper
 
-
+# This class is responsible for I/O interaction with the user
 class CLI:
   def __init__(self, progname, verbosity=0):
     self.verbosity = verbosity
+
+    # Program name prepended to every printed message
     self.footprint = CLI.bold(os.path.basename(progname)) + ':'
 
   @staticmethod
@@ -37,6 +40,7 @@ class CLI:
   def green(text):
     return '{}{}{}'.format('\033[32m', text, '\033[0m')
 
+  # Prompts user to choose one of available options
   def choose(self, options, title='Choose one of the following:'):
     self.print(title)
 
@@ -53,6 +57,8 @@ class CLI:
     except KeyboardInterrupt:
       sys.exit()
 
+  # Prompts user to choose a certain device when there's
+  # many of them
   def choose_serial(self):
     devices = [Option('{0:20} {1:40}'.format(device[0],
               device[1]), device) for device in STLink.devices()]
@@ -66,6 +72,7 @@ class CLI:
       return serial_
     return None
 
+  # Prints messages to stdout taking into account things like verbosity, etc.
   def print(self, text, verbosity=0, success=False, error=False):
     if self.verbosity < verbosity:
       return
@@ -77,6 +84,7 @@ class CLI:
     else:
       print(self.footprint, text)
 
+  # Calls another programs and handles errors
   def call(self, arglist, exit_on_error=True, success_message=None):
     kwargs = {}
     if self.verbosity < 1:
