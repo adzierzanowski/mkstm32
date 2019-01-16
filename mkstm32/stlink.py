@@ -5,7 +5,9 @@ import subprocess
 import serial
 from serial.tools.list_ports import comports
 
-from mkstm32.cli import Option
+from mkstm32.option import Option
+
+#TODO: rethink the classes and their separation
 
 class STLink:
   def __init__(self, cli):
@@ -35,18 +37,11 @@ class STLink:
     self.cli.call(['st-info', '--probe'])
 
   def reset(self):
-    devices = [Option('{0:20} {1:40}'.format(device[0],
-              device[1]), device) for device in STLink.devices()]
-
-    if not devices:
-      self.cli.print('Could not find any ST-Link devices.', error=True)
-      sys.exit(1)
-
-    if len(devices) > 1:
-      serial_ = self.cli.choose(devices)[1]
-      self.cli.call(['st-flash', '--serial', serial_, 'reset'])
-    else:
+    serial_ = self.cli.choose_serial()
+    if serial_ is None:
       self.cli.call(['st-flash', 'reset'])
+    else:
+      self.cli.call(['st-flash', '--serial', serial_, 'reset'])
 
   def monitor(self, port):
     if port is None:

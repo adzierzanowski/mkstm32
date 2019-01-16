@@ -2,6 +2,9 @@ import os
 import sys
 import subprocess
 
+from mkstm32.option import Option
+from mkstm32.stlink import STLink
+
 # Checks for ANSI escape codes support
 def formatter(func):
   def wrapper(text):
@@ -13,16 +16,6 @@ def formatter(func):
 
   return wrapper
 
-class Option:
-  def __init__(self, key, value):
-    self.key = key
-    self.value = value
-
-  def __str__(self):
-    return self.key
-
-  def __repr__(self):
-    return self.key
 
 class CLI:
   def __init__(self, progname, verbosity=0):
@@ -59,6 +52,19 @@ class CLI:
       sys.exit(1)
     except KeyboardInterrupt:
       sys.exit()
+
+  def choose_serial(self):
+    devices = [Option('{0:20} {1:40}'.format(device[0],
+              device[1]), device) for device in STLink.devices()]
+
+    if not devices:
+      self.print('Could not find any ST-Link devices.', error=True)
+      sys.exit(1)
+
+    if len(devices) > 1:
+      serial_ = self.choose(devices)[1]
+      return serial_
+    return None
 
   def print(self, text, verbosity=0, success=False, error=False):
     if self.verbosity < verbosity:

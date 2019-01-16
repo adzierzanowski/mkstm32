@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 import shutil
 import subprocess
@@ -31,7 +30,7 @@ class Project:
 
   def __exit__(self, ex_type, ex_val, traceback):
     took = time.time() - self.start
-    if took > 0.01:
+    if took > 0.05:
       self.cli.print('Done in {0:0.2f} seconds.'.format(time.time() - self.start), verbosity=2)
 
   def path(self, file_=''):
@@ -69,35 +68,22 @@ class Project:
     with open(self.path(Project.cpp_makefile), 'w') as f:
       f.write('\n'.join(splitdata))
 
-  # TODO: refactor this method
-  # TODO: merge boilerplate code
   def upload(self):
-    devices = [Option('{0:20} {1:40}'.format(device[0],
-              device[1]), device) for device in STLink.devices()]
-
-    if not devices:
-      self.cli.print('Could not find any ST-Link devices.', error=True)
-      sys.exit(1)
-
-    if len(devices) > 1:
-      serial_ = self.cli.choose(devices)[1]
-      self.cli.call(['st-flash', '--serial', serial_, 'write', self.bin, '0x8000000'],
-        success_message='Successfully uploaded firmware.')
-    else:
+    serial_ = self.cli.choose_serial()
+    if serial_ is None:
       self.cli.call(['st-flash', 'write', self.bin, '0x8000000'],
         success_message='Successfully uploaded firmware.')
+    else:
+      self.cli.call(['st-flash', '--serial', serial_, 'write', self.bin, '0x8000000'],
+        success_message='Successfully uploaded firmware.')
 
-  # TODO: merge boilerplate code
   def debug(self):
-    devices = STLink.devices()
-    if not devices:
-      self.cli.print('No ST-Link devices found.')
-      sys.exit(1)
-    
-    if len(devices) > 1:
+    serial_ = self.cli.choose_serial()
+    if serial_ is None:
+      self.cli.print('Starting GDB server.', verbosity=1)
+    else:
       self.cli.choose([Option('{0:20} {1:40}'.format(device[0],
                       device[1]), device) for device in STLink.devices()])
-    self.cli.print('Starting GDB server.', verbosity=1)
 
     kwargs = {}
     if self.cli.verbosity < 3:
