@@ -2,8 +2,6 @@ import os
 import sys
 import subprocess
 
-from serial.tools.list_ports import comports
-
 # Checks for ANSI escape codes support
 def formatter(func):
   def wrapper(text):
@@ -14,6 +12,17 @@ def formatter(func):
     return text
 
   return wrapper
+
+class Option:
+  def __init__(self, key, value):
+    self.key = key
+    self.value = value
+
+  def __str__(self):
+    return self.key
+
+  def __repr__(self):
+    return self.key
 
 class CLI:
   def __init__(self, progname, verbosity=0):
@@ -35,24 +44,21 @@ class CLI:
   def green(text):
     return '{}{}{}'.format('\033[32m', text, '\033[0m')
 
-  def choose_port(self):
-    ports = comports()
-    if ports:
-      self.print('Choose one of the following ports:')
-      for i, p in enumerate(ports):
-        self.print('[{0}] {1:40} {2:20}'.format(i, p.device, p.description))
-      try:
-        choice = input('> ')
-        port = ports[int(choice)].device
-        return port
-      except IndexError:
-        self.print('No valid port chosen.', error='True')
-        sys.exit(1)
-      except KeyboardInterrupt:
-        sys.exit()
-    else:
-      self.print('No COM ports available.', error=True)
+  def choose(self, options, title='Choose one of the following:'):
+    self.print(title)
+
+    for i, o in enumerate(options):
+      self.print('[{}] {}'.format(i, o.key))
+
+    try:
+      choice = int(input('> '))
+      print('debug', options[choice].value)
+      return options[choice].value
+    except IndexError:
+      self.print('No valid option chosen.', error=True)
       sys.exit(1)
+    except KeyboardInterrupt:
+      sys.exit()
 
   def print(self, text, verbosity=0, success=False, error=False):
     if self.verbosity < verbosity:

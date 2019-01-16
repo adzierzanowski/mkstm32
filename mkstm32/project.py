@@ -4,6 +4,9 @@ import time
 import shutil
 import subprocess
 
+from mkstm32.cli import Option
+from mkstm32.stlink import STLink
+
 class Project:
   standard_makefile = 'Makefile'
   cpp_makefile = 'Makefile_cpp.mk'
@@ -68,24 +71,17 @@ class Project:
 
   # TODO: refactor this method
   def upload(self):
-    devices = self.stlink.devices()
+    devices = [Option('{0:20} {1:40}'.format(device[0],
+              device[1]), device) for device in STLink.devices()]
 
-    if devices['count'] > 1:
-      self.cli.print('Choose one of the following devices')
-      for i, p in enumerate(devices['devices']):
-        self.cli.print('[{0}] {1:20} {2:40}'.format(i, p[0], p[1]))
-      try:
-        choice = input('> ')
-        serial = devices['devices'][int(choice)][1]
-        self.cli.call(['st-flash', '--serial', serial, 'write', self.bin, '0x8000000'],
-          success_message='Successfully uploaded firmware.')
+    if not devices:
+      self.cli.print('Could not find any ST-Link devices.', error=True)
+      sys.exit(1)
 
-      except IndexError:
-        self.cli.print('No valid device chosen.', error='True')
-        sys.exit(1)
-      except KeyboardInterrupt:
-        sys.exit()
-
+    if len(devices) > 1:
+      serial_ = self.cli.choose(devices)[1]
+      self.cli.call(['st-flash', '--serial', serial_, 'write', self.bin, '0x8000000'],
+        success_message='Successfully uploaded firmware.')
     else:
       self.cli.call(['st-flash', 'write', self.bin, '0x8000000'],
         success_message='Successfully uploaded firmware.')

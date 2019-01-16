@@ -1,45 +1,58 @@
 import re
 import sys
-import serial
 import subprocess
+
+import serial
+from serial.tools.list_ports import comports
+
+from mkstm32.cli import Option
 
 class STLink:
   def __init__(self, cli):
     self.cli = cli
 
-  # TODO: refactor this method
-  def devices(self):
-    devinfo = {}
-
+  @staticmethod
+  def devices():
     p = subprocess.Popen(['st-info', '--probe'], stdout=subprocess.PIPE)
-    data = p.communicate()[0].decode('utf8').splitlines()
+    data, _ = p.communicate()
+    data = data.decode('utf8')
 
-    # Get number of STLink devices
-    n_regex = re.compile(r'\d+')
-    n = int(re.findall(n_regex, data[0])[0])
-    devinfo['count'] = n
 
     # Get names of the devices
     name_regex = re.compile(r'descr: (.+)')
-    names = re.findall(name_regex, '\n'.join(data[1:]))
+    names = name_regex.findall(data)
 
     # Get serial numbers
     serial_regex = re.compile(r'serial: (.+)')
-    serials = re.findall(serial_regex, '\n'.join(data[1:]))
+    serials = serial_regex.findall(data)
 
-    devinfo['devices'] = list(zip(names, serials))
-    
-    return devinfo
+    # Zip them together
+    devices_ = list(zip(names, serials))
+
+    return devices_
 
   def probe(self):
     self.cli.call(['st-info', '--probe'])
 
   def reset(self):
-    self.cli.call(['st-flash', 'reset'])
+    devices = [Option('{0:20} {1:40}'.format(device[0],
+              device[1]), device) for device in STLink.devices()]
+
+    if not devices:
+      self.cli.print('Could not find any ST-Link devices.', error=True)
+      sys.exit(1)
+
+    if len(devices) > 1:
+      serial_ = self.cli.choose(devices)[1]
+      self.cli.call(['st-flash', '--serial', serial_, 'reset'])
+    else:
+      self.cli.call(['st-flash', 'reset'])
 
   def monitor(self, port):
     if port is None:
-      port = self.cli.choose_port()
+      ports = [Option('{0:40} {1:20}'.format(p.device, p.description), p) for p in comports()]
+      port = self.cli.choose(ports).device
+      print(port)
 
     s = None
     try:

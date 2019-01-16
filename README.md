@@ -81,3 +81,4 @@ Et voilà.
 
 * Some refactoring.
 * See if it really works on Windows (it does but it can do better, I think)
+* Project.size() handle FileNotFound
