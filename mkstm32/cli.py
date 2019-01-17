@@ -5,9 +5,9 @@ import subprocess
 from mkstm32.helpers import Option
 from mkstm32.stlink import STLink
 
-# Checks for ANSI escape codes support
-# Those are responsible for colorful messages
 def formatter(func):
+  '''Checks for ANSI escape codes support.
+  Those are responsible for colorful messages.'''
   def wrapper(text):
     posix_support = os.name == 'posix' and hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
     win_support = os.name == 'nt' and 'ANSICON' in os.environ
@@ -17,8 +17,8 @@ def formatter(func):
 
   return wrapper
 
-# This class is responsible for I/O interaction with the user
 class CLI:
+  '''This class is responsible for I/O interaction with the user'''
   def __init__(self, progname, verbosity=0):
     self.verbosity = verbosity
 
@@ -40,8 +40,8 @@ class CLI:
   def green(text):
     return '{}{}{}'.format('\033[32m', text, '\033[0m')
 
-  # Prompts user to choose one of available options
   def choose(self, options, title='Choose one of the following:'):
+    ''' Prompts user to choose one of available options'''
     self.print(title)
 
     for i, o in enumerate(options):
@@ -57,9 +57,9 @@ class CLI:
     except KeyboardInterrupt:
       sys.exit()
 
-  # Prompts user to choose a certain device when there's
-  # many of them
   def choose_serial(self):
+    '''Prompts user to choose a certain device when there's
+    many of them.'''
     devices = [Option('{0:20} {1:40}'.format(device[0],
               device[1]), device) for device in STLink.devices()]
 
@@ -72,8 +72,8 @@ class CLI:
       return serial_
     return None
 
-  # Prints messages to stdout taking into account things like verbosity, etc.
   def print(self, text, verbosity=0, success=False, error=False):
+    '''Prints messages to stdout taking into account things like verbosity, etc.'''
     if self.verbosity < verbosity:
       return
 
@@ -84,8 +84,8 @@ class CLI:
     else:
       print(self.footprint, text)
 
-  # Calls another programs and handles errors
   def call(self, arglist, exit_on_error=True, success_message=None):
+    '''Calls another programs and handles errors.'''
     kwargs = {}
     if self.verbosity < 1:
       kwargs = {'stdout': subprocess.DEVNULL, 'stderr': subprocess.DEVNULL}
