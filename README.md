@@ -29,6 +29,16 @@ You should be able to run this script after:
 using mingw32, you should use `make.exe` from `MinGW\msys\1.0\bin` rather
 than `mingw32-make.exe` from `MinGW\bin` or rename `mingw32-make.exe` to `make.exe`).
 
+For some strange reason, this works when you type something along those lines:
+
+        >python3 mkstm32
+
+But the script installed with pip fails throwing `ModuleNotFoundError`.
+What makes it even stranger, when you open the Python interpreter
+and type in the import that failed, it magically works.
+
+Well, anyway, it does eventually work on Windows after some hassle.
+
 If you are using `cmd.exe`, I recommend using [ansicon](https://github.com/adoxa/ansicon)
 for colorful messages. It's way easier to skim through the output.
 
@@ -64,7 +74,7 @@ for colorful messages. It's way easier to skim through the output.
 
 # examples
 
-Say we want to compile, upload and debug a project in directory `F042_test`.
+Say we want to compile, upload and debug a project in a directory called `F042_test`.
 
     mkstm32 -zxcudp F042_Test
 
@@ -79,8 +89,5 @@ Et voilà.
 
 # todo
 
-* Some refactoring.
 * See if it really works on Windows (it does but it can do better, I think)
-* Project.size() handle FileNotFound
-* configurable compiling flags
-* gdbinit creation from cong
+* .gdbinit creation from config
