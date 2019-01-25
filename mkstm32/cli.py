@@ -8,6 +8,7 @@ from mkstm32.stlink import STLink
 def formatter(func):
   '''Checks for ANSI escape codes support.
   Those are responsible for colorful messages.'''
+
   def wrapper(text):
     posix_support = os.name == 'posix' and hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
     win_support = os.name == 'nt' and 'ANSICON' in os.environ
@@ -19,6 +20,7 @@ def formatter(func):
 
 class CLI:
   '''This class is responsible for I/O interaction with the user'''
+
   def __init__(self, progname, verbosity=0):
     self.verbosity = verbosity
 
@@ -42,6 +44,7 @@ class CLI:
 
   def choose(self, options, title='Choose one of the following:'):
     ''' Prompts user to choose one of available options'''
+
     self.print(title)
 
     for i, o in enumerate(options):
@@ -49,7 +52,6 @@ class CLI:
 
     try:
       choice = int(input('> '))
-      print('debug', options[choice].value)
       return options[choice].value
     except IndexError:
       self.print('No valid option chosen.', error=True)
@@ -60,6 +62,7 @@ class CLI:
   def choose_serial(self):
     '''Prompts user to choose a certain device when there's
     many of them.'''
+
     devices = [Option('{0:20} {1:40}'.format(device[0],
               device[1]), device) for device in STLink.devices()]
 
@@ -74,6 +77,7 @@ class CLI:
 
   def print(self, text, verbosity=0, success=False, error=False):
     '''Prints messages to stdout taking into account things like verbosity, etc.'''
+
     if self.verbosity < verbosity:
       return
 
@@ -86,6 +90,7 @@ class CLI:
 
   def call(self, arglist, exit_on_error=True, success_message=None):
     '''Calls another programs and handles errors.'''
+
     kwargs = {}
     if self.verbosity < 1:
       kwargs = {'stdout': subprocess.DEVNULL, 'stderr': subprocess.DEVNULL}

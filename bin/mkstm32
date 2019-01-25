@@ -33,6 +33,7 @@ if __name__ == '__main__':
   stlink_ops = parser.add_argument_group(title='ST-Link operations')
   stlink_ops.add_argument('-i', '--probe', action='store_true',
     help='Print ST-Link connection information')
+  stlink_ops.add_argument('-l', '--list-ports', action='store_true', help='List serial ports')
   stlink_ops.add_argument('-m', '--monitor', action='store_true', help='Serial monitor')
   stlink_ops.add_argument('-P', '--port', type=str, metavar='PORT')
   stlink_ops.add_argument('-r', '--reset', action='store_true', help='Reset the microcontroller')
@@ -49,6 +50,9 @@ if __name__ == '__main__':
   if args.version:
     cli.print(__version__)
     sys.exit()
+
+  if args.list_ports:
+    stlink.list_ports()
 
   if args.reset:
     stlink.reset()

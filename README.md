@@ -31,7 +31,7 @@ than `mingw32-make.exe` from `MinGW\bin` or rename `mingw32-make.exe` to `make.e
 
 For some strange reason, this works when you type something along those lines:
 
-        >python3 mkstm32
+    >python3 mkstm32
 
 But the script installed with pip fails throwing `ModuleNotFoundError`.
 What makes it even stranger, when you open the Python interpreter
@@ -68,6 +68,7 @@ for colorful messages. It's way easier to skim through the output.
 
     ST-Link operations:
     -i, --probe           Print ST-Link connection information
+    -l, --list-ports      List serial ports
     -m, --monitor         Serial monitor
     -P PORT, --port PORT
     -r, --reset           Reset the microcontroller
@@ -87,7 +88,12 @@ Say we want to compile, upload and debug a project in a directory called `F042_t
 
 Et voilà.
 
+# zsh completions
+
+    compdef _gnu_generic mkstm32
+
+should work just fine.
+
 # todo
 
-* See if it really works on Windows (it does but it can do better, I think)
 * .gdbinit creation from config

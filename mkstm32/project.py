@@ -10,6 +10,7 @@ from mkstm32.config import Config
 
 class Project:
   '''This class is responsible for handling an STM32CubeMX project.'''
+
   def __init__(self, dir_, cli, stlink, cpp=False):
     self.cli = cli
     self.stlink = stlink
@@ -34,15 +35,18 @@ class Project:
 
   def executable(self, ext='.bin'):
     '''Adds an extension to compiled executables based on the project's name.'''
+
     return self.path(os.path.join(Config.build_dir,
                      os.path.basename(self.dir) + ext))
 
   def path(self, file_=''):
     '''Returns path relative to the project directory.'''
+
     return os.path.join(self.dir, file_)
 
   def make(self):
     '''Calls make and creates makefile for C++ if needed.'''
+    
     success_msg = 'Successfuly compiled firmware'
     if self.cpp:
       self.cli.print('Compiling for C++', verbosity=1)
@@ -56,6 +60,7 @@ class Project:
 
   def generate_cpp_makefile(self):
     '''Converts standard Makefile to C++ Makefile.'''
+
     with open(self.path(Config.standard_makefile), 'r') as f:
       data = f.read()
 
@@ -74,6 +79,7 @@ class Project:
 
   def upload(self):
     '''Uploads the project to the microcontroller.'''
+
     serial_ = self.cli.choose_serial()
     if serial_ is None:
       self.cli.call(['st-flash', 'write', self.executable(), Config.flash_address],
@@ -86,6 +92,7 @@ class Project:
 
   def debug(self):
     '''Starts a GDB server and calls arm-none-eabi-gdb debugger.'''
+
     serial_ = self.cli.choose_serial()
     if serial_ is None:
       self.cli.print('Starting GDB server.', verbosity=1)
@@ -117,6 +124,7 @@ class Project:
 
   def size(self):
     '''Prints size of the compiled binaries.'''
+
     for file_ in [self.executable(ext) for ext in ['.bin', '.elf', '.hex']]:
       try:
         with open(file_, 'r') as f:
@@ -128,6 +136,7 @@ class Project:
 
   def clean(self):
     '''Cleans the build directory.'''
+
     self.cli.print('Cleaning build directory.', verbosity=1)
 
     try:
