@@ -72,7 +72,7 @@ class Project:
         splitdata.insert(i+1, 'LDFLAGS += -specs=nosys.specs')
 
       if 'CFLAGS =' in line:
-        splitdata.insert(i+1, 'CFLAGS += -std=c++14')
+        splitdata.insert(i+1, 'CFLAGS += -std=c++17')
 
     with open(self.path(Config.cpp_makefile), 'w') as f:
       f.write('\n'.join(splitdata))
