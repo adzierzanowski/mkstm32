@@ -41,6 +41,11 @@ class CLI:
   @formatter
   def green(text):
     return '{}{}{}'.format('\033[32m', text, '\033[0m')
+  
+  @staticmethod
+  @formatter
+  def yellow(text):
+    return '{}{}{}'.format('\033[33m', text, '\033[0m')
 
   def choose(self, options, title='Choose one of the following:'):
     ''' Prompts user to choose one of available options'''
@@ -54,6 +59,9 @@ class CLI:
       choice = int(input('> '))
       return options[choice].value
     except IndexError:
+      self.print('No valid option chosen.', error=True)
+      sys.exit(1)
+    except ValueError:
       self.print('No valid option chosen.', error=True)
       sys.exit(1)
     except KeyboardInterrupt:
@@ -75,7 +83,7 @@ class CLI:
       return serial_
     return None
 
-  def print(self, text, verbosity=0, success=False, error=False):
+  def print(self, text, verbosity=0, success=False, error=False, warning=False):
     '''Prints messages to stdout taking into account things like verbosity, etc.'''
 
     if self.verbosity < verbosity:
@@ -85,6 +93,8 @@ class CLI:
       sys.stderr.write('{} {}\n'.format(self.footprint, CLI.bold(CLI.red(text))))
     elif success:
       print(self.footprint, CLI.bold(CLI.green(text)))
+    elif warning:
+      print(self.footprint, CLI.bold(CLI.yellow(text)))
     else:
       print(self.footprint, text)
 

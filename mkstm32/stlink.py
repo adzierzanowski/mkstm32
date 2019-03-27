@@ -1,5 +1,6 @@
 import re
 import sys
+import time
 import subprocess
 
 import serial
@@ -62,6 +63,12 @@ class STLink:
           sys.stdout.write(s.read().decode('utf8'))
         except UnicodeDecodeError:
           pass
+
+        except serial.serialutil.SerialException:
+          self.cli.print('SerialException occurred.', warning=True)
+          self.cli.print('Resetting connection...')
+          time.sleep(0.5)
+          self.monitor(port)
 
     except KeyboardInterrupt:
       sys.exit()
