@@ -31,6 +31,7 @@ if __name__ == '__main__':
     help='Clean (remove) build directory')
 
   stlink_ops = parser.add_argument_group(title='ST-Link operations')
+  stlink_ops.add_argument('-b', '--baud-rate', type=int, help='Baud rate for serial monitor', default=9600)
   stlink_ops.add_argument('-i', '--probe', action='store_true',
     help='Print ST-Link connection information')
   stlink_ops.add_argument('-l', '--list-ports', action='store_true', help='List serial ports')
@@ -61,7 +62,7 @@ if __name__ == '__main__':
     stlink.probe()
 
   if args.monitor:
-    stlink.monitor(args.port)
+    stlink.monitor(args.port, args.baud_rate)
 
   with Project(args.project_dir, cli, stlink, cpp=args.cpp) as project:
     if args.size:

@@ -40,7 +40,7 @@ class STLink:
     for i, p in enumerate(comports()):
       print('{0:10} {1}'.format(self.cli.bold(i), p))
 
-  def monitor(self, port):
+  def monitor(self, port, baud_rate=9600):
     '''Starts a serial monitor on a specific port.'''
 
     if port is None:
@@ -50,7 +50,7 @@ class STLink:
 
     s = None
     try:
-      s = serial.Serial(port=port)
+      s = serial.Serial(port=port, baudrate=baud_rate)
     except serial.serialutil.SerialException:
       self.cli.print('Serial port failure: {}'.format(port), error=True)
 
@@ -68,7 +68,7 @@ class STLink:
           self.cli.print('SerialException occurred.', warning=True)
           self.cli.print('Resetting connection...')
           time.sleep(0.5)
-          self.monitor(port)
+          self.monitor(port, baud_rate)
 
     except KeyboardInterrupt:
       sys.exit()
