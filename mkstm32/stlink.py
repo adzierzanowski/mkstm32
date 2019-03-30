@@ -44,23 +44,22 @@ class STLink:
   def monitor(self, port, baud_rate=9600):
     '''Starts a serial monitor on a specific port.'''
 
+    def reset_connection(serial_interface):
+      self.cli.print('SerialException occurred.', warning=True)
+      self.cli.print('Resetting connection...')
+      serial_interface.close()
+      time.sleep(2)
+      serial_interface.open()
+      self.cli.print('Connection reset.')
+
     def thread_wrapper(func):
       def wrapper(*args, **kwargs):
         try:
           func(*args, **kwargs)
-
         except UnicodeDecodeError:
           pass
-
         except UnicodeEncodeError:
           pass
-
-        except serial.serialutil.SerialException:
-          self.cli.print('SerialException occurred.', warning=True)
-          self.cli.print('Resetting connection...')
-          time.sleep(1)
-          self.monitor(port, baud_rate)
-
         except KeyboardInterrupt:
           sys.exit()
 
@@ -70,17 +69,24 @@ class STLink:
     def keyboard_input(serial_interface):
       while True:
         text = input()
-        serial_interface.write(text.encode() + b'\n')
+        try:
+          serial_interface.write(text.encode() + b'\n')
+        except serial.serialutil.SerialException:
+          reset_connection(serial_interface)
 
     @thread_wrapper
     def serial_output(serial_interface):
       while True:
-        sys.stdout.write(serial_interface.read().decode())
+        try:
+          sys.stdout.write(serial_interface.read().decode())
+        except serial.serialutil.SerialException:
+          reset_connection(serial_interface)
 
     if port is None:
       ports = [Option('{0:40} {1:20}'.format(p.device, p.description), p) for p in comports()]
       port = self.cli.choose(ports).device
-      print('Listening on port: {}\n'.format(port))
+      print('Listening on port: {}'.format(port))
+      print('  at baud rate {}\n'.format(baud_rate))
 
     s = None
     try:
@@ -106,11 +112,11 @@ class STLink:
     keyboard_input_thread.start()
     serial_output_thread.start()
 
-    while True:
-      try:
+    try:
+      while True:
         pass
-      except KeyboardInterrupt:
-        sys.exit()
+    except KeyboardInterrupt:
+      sys.exit()
 
   def probe(self):
     '''Prints detailed information about connected devices.'''
