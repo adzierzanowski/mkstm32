@@ -2,6 +2,7 @@ import re
 import sys
 import time
 import subprocess
+import threading
 
 import serial
 from serial.tools.list_ports import comports
@@ -43,6 +44,39 @@ class STLink:
   def monitor(self, port, baud_rate=9600):
     '''Starts a serial monitor on a specific port.'''
 
+    def thread_wrapper(func):
+      def wrapper(*args, **kwargs):
+        try:
+          func(*args, **kwargs)
+
+        except UnicodeDecodeError:
+          pass
+
+        except UnicodeEncodeError:
+          pass
+
+        except serial.serialutil.SerialException:
+          self.cli.print('SerialException occurred.', warning=True)
+          self.cli.print('Resetting connection...')
+          time.sleep(1)
+          self.monitor(port, baud_rate)
+
+        except KeyboardInterrupt:
+          sys.exit()
+
+      return wrapper
+
+    @thread_wrapper
+    def keyboard_input(serial_interface):
+      while True:
+        text = input()
+        serial_interface.write(text.encode() + b'\n')
+
+    @thread_wrapper
+    def serial_output(serial_interface):
+      while True:
+        sys.stdout.write(serial_interface.read().decode())
+
     if port is None:
       ports = [Option('{0:40} {1:20}'.format(p.device, p.description), p) for p in comports()]
       port = self.cli.choose(ports).device
@@ -57,21 +91,26 @@ class STLink:
     if s is None:
       sys.exit(1)
 
-    try:
-      while True:
-        try:
-          sys.stdout.write(s.read().decode('utf8'))
-        except UnicodeDecodeError:
-          pass
+    keyboard_input_thread = threading.Thread(
+      target=keyboard_input,
+      args=[s],
+      daemon=True
+    )
 
-        except serial.serialutil.SerialException:
-          self.cli.print('SerialException occurred.', warning=True)
-          self.cli.print('Resetting connection...')
-          time.sleep(0.5)
-          self.monitor(port, baud_rate)
+    serial_output_thread = threading.Thread(
+      target=serial_output,
+      args=[s],
+      daemon=True
+    )
 
-    except KeyboardInterrupt:
-      sys.exit()
+    keyboard_input_thread.start()
+    serial_output_thread.start()
+
+    while True:
+      try:
+        pass
+      except KeyboardInterrupt:
+        sys.exit()
 
   def probe(self):
     '''Prints detailed information about connected devices.'''
@@ -86,4 +125,3 @@ class STLink:
       self.cli.call(['st-flash', 'reset'])
     else:
       self.cli.call(['st-flash', '--serial', serial_, 'reset'])
-

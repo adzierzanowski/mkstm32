@@ -46,7 +46,7 @@ class Project:
 
   def make(self):
     '''Calls make and creates makefile for C++ if needed.'''
-    
+
     success_msg = 'Successfuly compiled firmware'
     if self.cpp:
       self.cli.print('Compiling for C++', verbosity=1)
