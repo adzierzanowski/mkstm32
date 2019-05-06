@@ -39,6 +39,8 @@ if __name__ == '__main__':
   stlink_ops.add_argument('-m', '--monitor', action='store_true', help='Serial monitor')
   stlink_ops.add_argument('-P', '--port', type=str, metavar='PORT')
   stlink_ops.add_argument('-r', '--reset', action='store_true', help='Reset the microcontroller')
+  stlink_ops.add_argument('--uart-reset-time', type=int, default=1,
+    help='Sleep time before resetting the connection on error')
 
   if len(sys.argv) < 2:
     parser.print_help()
@@ -63,7 +65,7 @@ if __name__ == '__main__':
     stlink.probe()
 
   if args.monitor:
-    stlink.monitor(args.port, args.baud_rate)
+    stlink.monitor(args.port, args.baud_rate, args.uart_reset_time)
 
   with Project(args.project_dir, cli, stlink, cpp=args.cpp) as project:
     if args.size:

@@ -38,17 +38,28 @@ class STLink:
 
   def list_ports(self):
     '''Lists available serial ports'''
-    for i, p in enumerate(comports()):
-      print('{0:10} {1}'.format(self.cli.bold(i), p))
+    print('{:4} {:30} {:20} {:20}'.format(
+      '#',
+      'Port',
+      'Manufacturer',
+      'Product'))
 
-  def monitor(self, port, baud_rate=9600):
+    print('-'*79)
+    for i, p in enumerate(comports()):
+      print('{:12} {:30} {:20} {:20}'.format(
+        self.cli.bold(i),
+        str(p.device)[:20],
+        str(p.manufacturer),
+        str(p.product)))
+
+  def monitor(self, port, baud_rate=9600, uart_reset_time=1):
     '''Starts a serial monitor on a specific port.'''
 
     def reset_connection(serial_interface):
       self.cli.print('SerialException occurred.', warning=True)
       self.cli.print('Resetting connection...')
       serial_interface.close()
-      time.sleep(2)
+      time.sleep(uart_reset_time)
       serial_interface.open()
       self.cli.print('Connection reset.')
 
