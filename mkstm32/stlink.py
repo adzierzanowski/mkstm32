@@ -38,17 +38,17 @@ class STLink:
 
   def list_ports(self):
     '''Lists available serial ports'''
-    print('{:4} {:30} {:20} {:20}'.format(
-      '#',
-      'Port',
-      'Manufacturer',
-      'Product'))
+    print('{:4} {:40} {:16} {:16}'.format(
+      self.cli.bold('#'),
+      self.cli.bold('   Port'),
+      self.cli.bold('           Manufacturer'),
+      self.cli.bold('    Product')))
 
-    print('-'*79)
+    #print('-'*79)
     for i, p in enumerate(comports()):
-      print('{:12} {:30} {:20} {:20}'.format(
+      print('{:12} {:40} {:16} {:16}'.format(
         self.cli.bold(i),
-        str(p.device)[:20],
+        str(p.device)[:40],
         str(p.manufacturer),
         str(p.product)))
 
