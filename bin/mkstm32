@@ -31,7 +31,7 @@ if __name__ == '__main__':
     help='Clean (remove) build directory')
 
   stlink_ops = parser.add_argument_group(title='ST-Link operations')
-  stlink_ops.add_argument('-b', '--baud-rate', type=int, default=9600,
+  stlink_ops.add_argument('-b', '--baud-rate', type=int, default=115200,
     help='Baud rate for serial monitor')
   stlink_ops.add_argument('-i', '--probe', action='store_true',
     help='Print ST-Link connection information')
