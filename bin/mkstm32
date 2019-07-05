@@ -16,6 +16,7 @@ if __name__ == '__main__':
   common_ops = parser.add_argument_group(title='Common operations')
   common_ops.add_argument('-u', '--upload', action='store_true')
   common_ops.add_argument('-d', '--debug', action='store_true', help='Start GDB session')
+  common_ops.add_argument('-M', '--upload-method', type=str, default='stlink')
   common_ops.add_argument('-v', '--verbosity', type=int, default=2, metavar='V',
     help='Verbosity level from -1 (completely silent) to 2 (fully verbose, default)')
   common_ops.add_argument('-V', '--version', action='store_true', help='Print version')
@@ -78,7 +79,7 @@ if __name__ == '__main__':
       project.make()
 
     if args.upload:
-      project.upload()
+      project.upload(method=args.upload_method)
 
     if args.debug:
       project.debug()

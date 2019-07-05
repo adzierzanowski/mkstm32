@@ -77,18 +77,26 @@ class Project:
     with open(self.path(Config.cpp_makefile), 'w') as f:
       f.write('\n'.join(splitdata))
 
-  def upload(self):
+  def upload(self, method='stlink'):
     '''Uploads the project to the microcontroller.'''
 
-    serial_ = self.cli.choose_serial()
-    if serial_ is None:
-      self.cli.call(['st-flash', 'write', self.executable(), Config.flash_address],
+    if method == 'stlink':
+      serial_ = self.cli.choose_serial()
+      if serial_ is None:
+        self.cli.call(['st-flash', 'write', self.executable(), Config.flash_address],
+          success_message='Successfully uploaded firmware.')
+      else:
+        self.cli.call(['st-flash',
+                      '--serial', serial_,
+                      'write', self.executable(), Config.flash_address],
+                      success_message='Successfully uploaded firmware.')
+    elif method == 'dfu':
+      self.cli.call(['dfu-util',
+        '-d', '0483:df11',
+        '-a', '0',
+        '-s', '{}:leave:force:{}'.format(Config.flash_address, self.size()['.bin']),
+        '-D', self.executable()],
         success_message='Successfully uploaded firmware.')
-    else:
-      self.cli.call(['st-flash',
-                    '--serial', serial_,
-                    'write', self.executable(), Config.flash_address],
-                    success_message='Successfully uploaded firmware.')
 
   def debug(self):
     '''Starts a GDB server and calls arm-none-eabi-gdb debugger.'''
@@ -125,14 +133,20 @@ class Project:
   def size(self):
     '''Prints size of the compiled binaries.'''
 
-    for file_ in [self.executable(ext) for ext in ['.bin', '.elf', '.hex']]:
+    out = {}
+    for ext in ['.bin', '.elf', '.hex']:
+      file_ = self.executable(ext)
       try:
         with open(file_, 'r') as f:
           f.seek(0, 2)
-          self.cli.print('{}: {} B'.format(os.path.basename(file_), f.tell()))
+          size_ = f.tell()
+          self.cli.print('{}: {} B'.format(os.path.basename(file_), size_))
+          out[ext] = size_
       except FileNotFoundError:
         self.cli.print('File not found.', error=True)
         sys.exit(1)
+
+    return out
 
   def clean(self):
     '''Cleans the build directory.'''
