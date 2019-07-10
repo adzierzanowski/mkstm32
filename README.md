@@ -11,6 +11,7 @@ Following programs are required to be included in `$PATH`:
 * [arm-none-eabi-\*](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads) binaries
 * [texane/stlink](https://github.com/texane/stlink) binaries (`st-flash`,
 `st-util`, `st-info`)
+* [dfu-util](http://dfu-util.sourceforge.net/)
 
 # setup 
 
