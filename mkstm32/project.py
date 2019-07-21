@@ -51,12 +51,18 @@ class Project:
     if self.cpp:
       self.cli.print('Compiling for C++', verbosity=1)
       self.generate_cpp_makefile()
-      self.cli.call(['make', '-f', self.path(Config.cpp_makefile)],
-                    success_message=success_msg)
+      self.cli.call([
+              'make',
+              '-j', '4',
+              '-f', self.path(Config.cpp_makefile)
+          ], success_message=success_msg)
     else:
       self.cli.print('Compiling for C', verbosity=1)
-      self.cli.call(['make', '-f', self.path(Config.standard_makefile)],
-                    success_message=success_msg)
+      self.cli.call([
+          'make',
+          '-j', '4',
+          '-f', self.path(Config.standard_makefile)
+      ], success_message=success_msg)
 
   def generate_cpp_makefile(self):
     '''Converts standard Makefile to C++ Makefile.'''
