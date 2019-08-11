@@ -10,3 +10,4 @@ class Config:
 
   # Entry point of an STM32 program
   flash_address = '0x8000000'
+

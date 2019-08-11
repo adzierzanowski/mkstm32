@@ -4,9 +4,9 @@ import time
 import shutil
 import subprocess
 
-from mkstm32.helpers import Option
-from mkstm32.stlink import STLink
-from mkstm32.config import Config
+from .helpers import Option
+from .stlink import STLink
+from .config import Config
 
 class Project:
   '''This class is responsible for handling an STM32CubeMX project.'''
@@ -31,10 +31,13 @@ class Project:
   def __exit__(self, ex_type, ex_val, traceback):
     took = time.time() - self.start
     if took > 0.05:
-      self.cli.print('Done in {0:0.2f} seconds.'.format(time.time() - self.start), verbosity=2)
+      self.cli.print(
+        'Done in {0:0.2f} seconds.'.format(time.time() - self.start),
+        verbosity=2)
 
   def executable(self, ext='.bin'):
-    '''Adds an extension to compiled executables based on the project's name.'''
+    '''Adds an extension to compiled executables based on
+    the project's name.'''
 
     return self.path(os.path.join(Config.build_dir,
                      os.path.basename(self.dir) + ext))
@@ -89,7 +92,8 @@ class Project:
     if method == 'stlink':
       serial_ = self.cli.choose_serial()
       if serial_ is None:
-        self.cli.call(['st-flash', 'write', self.executable(), Config.flash_address],
+        self.cli.call(
+          ['st-flash', 'write', self.executable(), Config.flash_address],
           success_message='Successfully uploaded firmware.')
       else:
         self.cli.call(['st-flash',
@@ -100,7 +104,8 @@ class Project:
       self.cli.call(['dfu-util',
         '-d', '0483:df11',
         '-a', '0',
-        '-s', '{}:leave:force:{}'.format(Config.flash_address, self.size()['.bin']),
+        '-s', '{}:leave:force:{}'.format(
+          Config.flash_address, self.size()['.bin']),
         '-D', self.executable()],
         success_message='Successfully uploaded firmware.')
 
@@ -164,3 +169,4 @@ class Project:
       self.cli.print('Successfully cleaned build directory.', verbosity=2, success=True)
     except FileNotFoundError:
       self.cli.print('Build directory doesn\'t exist.', error=True)
+

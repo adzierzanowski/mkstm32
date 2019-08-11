@@ -3,6 +3,8 @@ import shutil
 
 from setuptools import setup
 
+from mkstm32.version import __version__
+
 scripts = ['bin/mkstm32']
 
 if os.name == 'nt':
@@ -11,14 +13,16 @@ if os.name == 'nt':
 
 setup(
   name='mkstm32',
-  version='1.6.10',
+  version=__version__,
   description='Upload, debug and compile STM32CubeMX Makefile projects',
   url='https://github.com/adzierzanowski/mkstm32',
   author='Aleksander Dzierżanowski',
   author_email='a.dzierzanowski1@gmail.com',
   license='MIT',
   packages=['mkstm32'],
+  package_dir={'mkstm32': 'src/mkstm32'},
   install_requires=['pyserial'],
   scripts=scripts,
   zip_safe=False
 )
+

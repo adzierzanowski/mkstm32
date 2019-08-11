@@ -7,7 +7,7 @@ import threading
 import serial
 from serial.tools.list_ports import comports
 
-from mkstm32.helpers import Option
+from .helpers import Option
 
 class STLink:
   '''This class is responsible for ST-Link connection and operations.'''
@@ -142,3 +142,4 @@ class STLink:
       self.cli.call(['st-flash', 'reset'])
     else:
       self.cli.call(['st-flash', '--serial', serial_, 'reset'])
+

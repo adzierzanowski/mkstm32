@@ -8,3 +8,4 @@ class Option:
 
   def __repr__(self):
     return self.key
+

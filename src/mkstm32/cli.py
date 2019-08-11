@@ -2,8 +2,8 @@ import os
 import sys
 import subprocess
 
-from mkstm32.helpers import Option
-from mkstm32.stlink import STLink
+from .helpers import Option
+from .stlink import STLink
 
 def formatter(func):
   '''Checks for ANSI escape codes support.
@@ -120,3 +120,4 @@ class CLI:
     except KeyboardInterrupt:
       self.print('{} interrupted.'.format(arglist[0]), error=True)
       sys.exit(1)
+
