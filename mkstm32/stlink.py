@@ -58,9 +58,18 @@ class STLink:
     def reset_connection(serial_interface):
       self.cli.print('SerialException occurred.', warning=True)
       self.cli.print('Resetting connection...')
-      serial_interface.close()
-      time.sleep(uart_reset_time)
-      serial_interface.open()
+      retry_count = 0
+      while True:
+        retry_count += 1
+        self.cli.print('Retry count: {}'.format(retry_count))
+        try:
+          serial_interface.close()
+          time.sleep(uart_reset_time)
+          serial_interface.open()
+          break
+        except serial.SerialException:
+          continue
+
       self.cli.print('Connection reset.')
 
     def thread_wrapper(func):

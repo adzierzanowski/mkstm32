@@ -20,7 +20,6 @@ setup(
   author_email='a.dzierzanowski1@gmail.com',
   license='MIT',
   packages=['mkstm32'],
-  package_dir={'mkstm32': 'src/mkstm32'},
   install_requires=['pyserial'],
   scripts=scripts,
   zip_safe=False
