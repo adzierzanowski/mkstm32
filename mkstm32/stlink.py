@@ -1,6 +1,7 @@
 import re
 import sys
 import time
+import readline
 import subprocess
 import threading
 
